@@ -1,0 +1,71 @@
+{% load i18n %}
+{% load static from staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Report {{ pk }} | {% trans "Log viewer" %}</title>
+    <script src="{% static "js/linkify.min.js" %}"></script>
+  </head>
+  <body>
+    <div>
+    <strong>{% trans "Log levels" %}:</strong>
+      {% if log_all.n %}
+        {% if selected_log_level == 'all' %}
+          {% trans "ALL" %}
+        {% else %}
+          <a href="{{ view.request.path }}?log_level=all">{% trans "ALL" %}</a>
+        {% endif %}
+        <sup>({{ log_all.n }})</sup>
+      {% endif %} |
+      {% if log_warning.n %}
+        {% if selected_log_level == 'warning' %}
+          {% trans "WARNING" %}
+        {% else %}
+          <a href="{{ view.request.path }}?log_level=warning">{% trans "WARNING" %}</a>
+        {% endif %}
+        <sup>({{ log_warning.n }})</sup>
+      {% else %}
+        {% trans "WARNING" %} <sup>(0)</sup>
+      {% endif %} |
+      {% if log_error.n %}
+        {% if selected_log_level == 'error' %}
+          {% trans "ERROR" %}
+        {% else %}
+          <a href="{{ view.request.path }}?log_level=error">{% trans "ERROR" %}</a>
+        {% endif %}
+        <sup>({{ log_error.n }})</sup>
+      {% else %}
+        {% trans "ERROR" %} <sup>(0)</sup>
+      {% endif %}
+    </div>
+    <pre id="loglines">
+{{ log_txt }}
+    </pre>
+    <script type="text/javascript">
+        /**
+         * This code uses linkify.js to extract links in pre's content
+         * and convert all recognized urls into html links.
+         **/
+        var preText;
+        var urls;
+
+        preText = document.getElementById('loglines').innerText;
+        urls = linkify.find(preText, 'url');
+
+        unique_urls = [];
+        for (var i=0; i<urls.length; i++) {
+            url = urls[i];
+            if (unique_urls.indexOf(url['value']) === -1) {
+                preText = preText.replace(
+                    new RegExp(url['value'], "g"), function (matched) {
+                        return '<a href="' + matched + '" target="_blank">' + matched + '</a>';
+                    }
+                );
+                unique_urls.push(url['value']);
+            }
+        }
+        document.getElementById('loglines').innerHTML = preText;
+    </script>
+  </body>
+</html>

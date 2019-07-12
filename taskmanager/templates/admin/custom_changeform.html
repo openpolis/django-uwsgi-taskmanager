@@ -1,0 +1,9 @@
+{% extends 'admin/change_form.html' %}
+
+{% block submit_buttons_top %}
+    <div class="submit-row">
+            <input type="submit" value="Stop task" name="_stop-task">
+            <input type="submit" value="Start task" name="_start-task">
+    </div>
+    {{ block.super }}
+{% endblock %}

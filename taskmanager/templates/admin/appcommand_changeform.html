@@ -1,0 +1,12 @@
+{% extends 'admin/change_form.html' %}
+
+{% load i18n %}
+
+{% block after_field_sets %}
+    <div class="module aligned">
+        <h2>{% trans "Help text" %}</h2>
+        <div class="field-box">
+            <pre class="description">{{ original.help_text|safe }}</pre>
+        </div>
+    </div>
+{% endblock %}

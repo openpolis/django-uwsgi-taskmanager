@@ -1,0 +1,3 @@
+include *.md
+recursive-include taskmanager/static *
+recursive-include taskmanager/templates *
