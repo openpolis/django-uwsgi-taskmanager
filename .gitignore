@@ -126,3 +126,7 @@ dmypy.json
 .pyre/
 
 # END https://github.com/github/gitignore/blob/master/Python.gitignore
+
+
+# VisualStudioCode
+.vscode/
