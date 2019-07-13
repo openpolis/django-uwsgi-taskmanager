@@ -23,7 +23,7 @@ def convert_to_local_dt(dt):
     :param dt: a datetime.datetime object
     :return:   a datetime.datetime object
     """
-    if settings.USE_TZ:
+    if settings.USE_TZ and dt is not None:
         from pytz import timezone
 
         local_tz = timezone(settings.TIME_ZONE)
