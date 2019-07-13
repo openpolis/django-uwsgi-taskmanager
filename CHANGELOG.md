@@ -9,11 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Rename collect_commands to collectcommands
+- Rename `collect_commands` to `collectcommands`
 
 ### Fixed
 
-- Fix version 1.0.0 release date in CHANGELOG.md
+- Fix version 1.0.0 release date in `CHANGELOG.md`
+- Add missing `__init__.py` in migrations directory
 
 ## [1.0.0] - 2019-07-12
 
