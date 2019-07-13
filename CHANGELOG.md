@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2019-07-13
+
 ### Changed
 
 - Rename `collect_commands` to `collectcommands`
@@ -27,5 +29,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First release
 
-[Unreleased]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v1.0.0...master
+[Unreleased]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v1.0.1...master
+[1.0.1]: https://github.com/openpolis/django-uwsgi-taskmanager/releases/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/openpolis/django-uwsgi-taskmanager/releases/tag/v1.0.0
