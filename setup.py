@@ -59,12 +59,13 @@ setup(
         ]
     ),
     name="django-uwsgi-taskmanager",
-    packages=find_packages(exclude=["op_task_manager_project"]),
+    packages=find_packages(exclude=("tests", "demo")),
     project_urls={
         "Bug Reports": "https://github.com/openpolis/django-uwsgi-taskmanager/issues",
         "Source Code": "https://github.com/openpolis/django-uwsgi-taskmanager",
     },
     python_requires="~=3.6",
+    setup_requires=["wheel"],
     url="https://github.com/openpolis/django-uwsgi-taskmanager.git",
     version=taskmanager.__version__,
     zip_safe=False,

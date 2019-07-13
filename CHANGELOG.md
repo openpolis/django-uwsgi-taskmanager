@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add missing `STATIC_ROOT` in demo settings
 - Add missing media directory and settings
 - Fix convert to local datetime function
+- Update and complete `setup.py`
 
 ## [1.0.0] - 2019-07-12
 
