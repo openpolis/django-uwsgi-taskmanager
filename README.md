@@ -34,7 +34,7 @@ Django application to manage async tasks via admin interface, using uWSGI spoole
     ]
     ```
 
-2. Run `python manage.py migrate` to create the taskmanager models.
+2. Run `python manage.py migrate` to create the taskmanager tables.
 
 3. Run `python manage.py collectcommands` to create taskmanager commands.
 
@@ -75,7 +75,7 @@ uWSGI ini file (vassal) has to include the [spooler](https://uwsgi-docs.readthed
 
 ### Demo
 
-This a basic Django demo project with a `uwsgi.ini` file and three directories (`spooler`, `static`, `venv`).
+This a basic Django demo project with a `uwsgi.ini` file and four directories (`media`, `spooler`, `static`, `venv`).
 
 ```bash
 demo/
@@ -85,6 +85,7 @@ demo/
 │   ├── urls.py
 │   └── wsgi.py
 ├── manage.py
+├── media/
 ├── spooler/
 ├── static/
 ├── uwsgi.ini
@@ -130,8 +131,34 @@ Install uWSGI (if you use uWSGI of your OS you can skip this step):
 (venv) $ pip install uwsgi
 ```
 
+Collect all static files:
+
+```bash
+(venv) $ python manage.py collectstatic
+```
+
+Create all the tables:
+
+```bash
+(venv) $ python manage.py migrate
+```
+
+Collect all commands:
+
+```bash
+(venv) $ python manage.py collectcommands
+```
+
+Create a super user to login the admin:
+
+```bash
+(venv) $ python manage.py createsuperuser
+```
+
 Start the project with uWSGI:
 
 ```bash
-(venv) $  uwsgi --ini uwsgi.ini
+(venv) $ uwsgi --ini uwsgi.ini
 ```
+
+Visit http://127.0.0.1:8000/admin/

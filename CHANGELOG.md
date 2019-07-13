@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Rename `collect_commands` to `collectcommands`
+- Add missings setps in `README.md`
 
 ### Fixed
 
