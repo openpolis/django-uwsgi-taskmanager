@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix version 1.0.0 release date in `CHANGELOG.md`
 - Add missing `__init__.py` in migrations directory
+- Add missing `STATIC_ROOT` in demo settings
 
 ## [1.0.0] - 2019-07-12
 
