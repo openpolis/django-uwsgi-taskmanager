@@ -122,3 +122,10 @@ USE_TZ = True
 STATIC_URL = "/static/"
 
 STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, "static"))
+
+# Stored files
+# https://docs.djangoproject.com/en/2.2/topics/files/
+
+MEDIA_URL = "/media/"
+
+MEDIA_ROOT = os.path.abspath(os.path.join(BASE_DIR, "media"))
