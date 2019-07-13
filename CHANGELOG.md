@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Rename collect_commands to collectcommands
+
 ### Fixed
 
 - Fix version 1.0.0 release date in CHANGELOG.md

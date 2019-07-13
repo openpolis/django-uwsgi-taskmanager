@@ -36,7 +36,7 @@ Django application to manage async tasks via admin interface, using uWSGI spoole
 
 2. Run `python manage.py migrate` to create the taskmanager models.
 
-3. Run `python manage.py collect_commands` to create taskmanager commands.
+3. Run `python manage.py collectcommands` to create taskmanager commands.
 
 4. Include the taskmanager URLconf in your project `urls.py` like this _(optional)_:
 
@@ -62,7 +62,7 @@ Django application to manage async tasks via admin interface, using uWSGI spoole
 
 ## Usage
 
-You just need to install `django-uwsgi-taskmanager` in your Django Project and run `collect_commands` as described.
+You just need to install `django-uwsgi-taskmanager` in your Django Project and run `collectcommands` as described.
 Django uWSGI Taskmanager will collect all the commands and make them available for asynchronous scheduling in the admin.
 
 If you need a new asynchronous task, just write a standard custom Django command, and synchronize the app. Then go to the admin page and schedule it.

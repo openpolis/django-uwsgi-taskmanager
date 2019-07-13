@@ -14,18 +14,18 @@ class CollectTaskCommandTest(TestCase):
     def test_command_output(self):
         """Test the command output."""
         out = StringIO()
-        call_command("collect_commands", stdout=out)
+        call_command("collectcommands", stdout=out)
         self.assertIn("migrate", out.getvalue())
 
     def test_command_output_no_djangocore(self):
         """Test the command output invoked with excludecodre argument."""
         out = StringIO()
-        call_command("collect_commands", "--excludecore", stdout=out)
+        call_command("collectcommands", "--excludecore", stdout=out)
         self.assertNotIn("migrate", out.getvalue())
 
     def test_command_creation(self):
         """Test the commands creation."""
         self.assertEqual(AppCommand.objects.all().count(), 0)
         out = StringIO()
-        call_command("collect_commands", stdout=out)
+        call_command("collectcommands", stdout=out)
         self.assertNotEqual(AppCommand.objects.all().count(), 0)
