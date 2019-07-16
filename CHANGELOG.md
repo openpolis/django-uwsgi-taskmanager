@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Add **Copyright** section in `README.md` file
+
+### Changed
+
+- Add the full **GNU AGPL v3** in the `LICENSE.md` file
+
 ### Fixed
 
 - Fix broken 1.0.1 URL in `CHANGELOG.md`
