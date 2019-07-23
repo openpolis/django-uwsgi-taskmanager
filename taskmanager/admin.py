@@ -8,6 +8,7 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
+from pytz import timezone
 
 from taskmanager.models import AppCommand, Report, Task, TaskCategory
 from taskmanager.utils import log_tail
@@ -17,19 +18,16 @@ def convert_to_local_dt(dt):
     """Convert datetime into local datetime, if django settings are set up to use TZ.
 
     Datetime fields in django store datetimes as UTC date, if the USE_TZ setting is set.
-    To have the correct datetime sent to the admin,
-    without using django templating system, the conversion needs to be done manually.
-
-    :param dt: a datetime.datetime object
-    :return:   a datetime.datetime object
+    To have the correct datetime sent to the admin, without using django templating system,
+    the conversion needs to be done manually.
     """
-    if settings.USE_TZ and dt is not None:
-        from pytz import timezone
-
-        local_tz = timezone(settings.TIME_ZONE)
-        return local_tz.normalize(dt.astimezone(local_tz))
-    else:
-        return dt
+    try:
+        if settings.USE_TZ:
+            local_tz = timezone(settings.TIME_ZONE)
+            dt = local_tz.normalize(dt.astimezone(local_tz))
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
+    except AttributeError:
+        return ""
 
 
 class ReportMixin(object):
@@ -142,7 +140,7 @@ class TaskInline(admin.TabularInline):
         last_invocation_dt = convert_to_local_dt(obj.cached_last_invocation_datetime)
         try:
             s = (
-                f"{last_invocation_dt:%Y-%m-%d %H:%M:%S}: "
+                f"{last_invocation_dt}: "
                 f"{obj.cached_last_invocation_result} - "
                 f"{obj.cached_last_invocation_n_errors}E, "
                 f"{obj.cached_last_invocation_n_warnings}W"
@@ -161,7 +159,7 @@ class TaskInline(admin.TabularInline):
                 s = format_html(f'<a href="{logviewer_url}" target="_blank">{s}</a>')
         status_str += s + "/"
         if obj.cached_next_ride:
-            s = f"{convert_to_local_dt(obj.cached_next_ride):%Y-%m-%d %H:%M:%S}"
+            s = f"{convert_to_local_dt(obj.cached_next_ride)}"
         else:
             s = "-"
         status_str += s
@@ -388,7 +386,7 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
         last_invocation_dt = convert_to_local_dt(obj.cached_last_invocation_datetime)
         try:
             s = (
-                f"{last_invocation_dt:%Y-%m-%d %H:%M:%S}: "
+                f"{last_invocation_dt}: "
                 f"{obj.cached_last_invocation_result} - "
                 f"{obj.cached_last_invocation_n_errors}E, "
                 f"{obj.cached_last_invocation_n_warnings}W"
@@ -422,7 +420,7 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
     def next_ride_str(self, obj):
         """Return the string representation of the next ride."""
         if obj.cached_next_ride:
-            return f"{convert_to_local_dt(obj.cached_next_ride):%Y-%m-%d %H:%M:%S}"
+            return f"{convert_to_local_dt(obj.cached_next_ride)}"
         else:
             return "-"
 

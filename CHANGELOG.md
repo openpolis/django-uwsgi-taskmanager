@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2] - 2019-07-23
+
 ### Added
 
 - Add **Copyright** section in `README.md` file
@@ -18,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix broken 1.0.1 URL in `CHANGELOG.md`
+- Fix TypeError in taskcategory admin
 
 ### Removed
 
@@ -46,5 +49,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release
 
 [Unreleased]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v1.0.1...master
+[1.0.2]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/openpolis/django-uwsgi-taskmanager/releases/tag/v1.0.0
