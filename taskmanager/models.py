@@ -13,16 +13,6 @@ from django.utils.translation import ugettext_lazy as _
 from taskmanager.tasks import exec_command_task
 
 
-# FIXME: remove after migration squash
-def task_directory_path(instance, filename):
-    """
-    Return the file path within a task_id in the MEDIA_ROOT.
-
-    e.g. file will be uploaded to MEDIA_ROOT/taskmanager/logs/task_<id>/<filename>
-    """
-    return f"taskmanager/logs/task_{instance.task_id}/{filename}"
-
-
 class AppCommand(models.Model):
     """An application command representation."""
 

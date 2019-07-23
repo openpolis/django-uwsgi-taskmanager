@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix broken 1.0.1 URL in `CHANGELOG.md`
 
+### Removed
+
+- Remove unused code from models
+
 ## [1.0.1] - 2019-07-13
 
 ### Changed
