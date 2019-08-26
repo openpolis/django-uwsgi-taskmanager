@@ -37,6 +37,7 @@ setup(
         "file-read-backwards>=2.0.0",
         "uwsgidecorators-fallback>=0.0.3",
         "uwsgidecorators>=1.1.0",
+        "slackclient",
     ],
     extras_require={
         "optional": ["uwsgi"],
