@@ -140,3 +140,12 @@ class LoggingBaseCommand(BaseCommand):
             logger = logging.getLogger("django.commands")
             logger.error(e, exc_info=sys.exc_info(), extra={"status_code": 500})
             raise
+
+    def create_parser(self, prog_name, subcommand, **kwargs):
+        parser = super().create_parser(prog_name, subcommand, **kwargs)
+        parser.add_argument(
+            "--disable-notifications",
+            action="store_true",
+            default=False
+        )
+        return parser
