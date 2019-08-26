@@ -9,6 +9,8 @@ from django.core.management import call_command
 from file_read_backwards import FileReadBackwards
 from uwsgidecoratorsfallback import spool
 
+from taskmanager.settings import TASK_MANAGER_SAVE_LOGFILE
+
 
 @spool(pass_arguments=True)
 def exec_command_task(curr_task, *args, **kwargs):
@@ -72,7 +74,7 @@ def exec_command_task(curr_task, *args, **kwargs):
             result = Report.RESULT_WARNINGS
         if n_log_errors:
             result = Report.RESULT_ERRORS
-    if not getattr(settings, "TASK_MANAGER_SAVE_LOGFILE", True):
+    if not TASK_MANAGER_SAVE_LOGFILE:
         try:
             os.unlink(report_logfile_path)
         except FileNotFoundError:
