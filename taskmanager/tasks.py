@@ -91,6 +91,7 @@ def exec_command_task(curr_task, *args, **kwargs):
             "n_log_warnings",
         )
     )
+    report.emit_notification()
     curr_task.cached_last_invocation_result = report.invocation_result
     curr_task.cached_last_invocation_n_errors = report.n_log_errors
     curr_task.cached_last_invocation_n_warnings = report.n_log_warnings
