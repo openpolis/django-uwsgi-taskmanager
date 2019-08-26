@@ -1,23 +1,38 @@
 """Define Django models for the taskmanager app."""
 
 import datetime
-import os
-import re
 from io import StringIO
+import os
+from pathlib import Path
+import re
 
 from django.conf import settings
+from django.core.mail import send_mail
+from django.core.management import call_command
 from django.core.management import load_command_class
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from file_read_backwards import FileReadBackwards
 import slack
+from uwsgidecoratorsfallback import spool
 
 from taskmanager.settings import (
     NOTIFICATIONS_SLACK_TOKEN,
-    NOTIFICATIONS_SLACK_CHANNEL,
     NOTIFICATIONS_FAILURE_MESSAGE,
     NOTIFICATIONS_WARNINGS_MESSAGE,
+    NOTIFICATIONS_SLACK_CHANNELS,
+    TASK_MANAGER_SHOW_LOGVIEWER_LINK,
+    BASE_URL,
+    NOTIFICATIONS_EMAIL_RECIPIENTS,
+    TASK_MANAGER_N_REPORTS_INLINE,
+    TASK_MANAGER_SAVE_LOGFILE,
+    TASK_MANAGER_N_LINES_IN_REPORT_LOG,
+    NOTIFICATIONS_EMAIL_FROM,
 )
-from taskmanager.tasks import exec_command_task
+from taskmanager.utils import log_tail
+
+if NOTIFICATIONS_SLACK_TOKEN:
+    slack_client = slack.WebClient(token=NOTIFICATIONS_SLACK_TOKEN)
 
 
 class AppCommand(models.Model):
@@ -99,28 +114,87 @@ class Report(models.Model):
 
         if self.invocation_result != self.RESULT_OK:
 
-            if NOTIFICATIONS_SLACK_TOKEN and NOTIFICATIONS_SLACK_CHANNEL:
-
+            if NOTIFICATIONS_SLACK_TOKEN and NOTIFICATIONS_SLACK_CHANNELS:
+                blocks = [
+                    {
+                        "type": "context",
+                        "elements": [
+                            {"type": "mrkdwn", "text": f"django-uwsgi-taskmanager"}
+                        ],
+                    }
+                ]
                 if self.invocation_result == self.RESULT_FAILED:
-                    message = NOTIFICATIONS_FAILURE_MESSAGE.format(
-                        task_name=self.task.name,
-                        invocation_time=self.invocation_datetime,
+                    blocks.append(
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": NOTIFICATIONS_FAILURE_MESSAGE.format(
+                                    task_name=self.task.name,
+                                    invocation_time=(
+                                        "<!date"
+                                        f"^{int(self.invocation_datetime.timestamp())}"
+                                        "^{date_num} {time_secs}|???>"
+                                    ),
+                                ),
+                            },
+                        }
                     )
                 else:
-                    message = NOTIFICATIONS_WARNINGS_MESSAGE.format(
-                        task_name=self.task.name,
-                        invocation_time=self.invocation_datetime,
-                        n_errors=self.n_log_errors,
-                        n_warnings=self.n_log_warnings,
+                    blocks.append(
+                        {
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": NOTIFICATIONS_WARNINGS_MESSAGE.format(
+                                    task_name=self.task.name,
+                                    invocation_time=(
+                                        "<!date"
+                                        f"^{int(self.invocation_datetime.timestamp())}"
+                                        "^{date_num} {time_secs}|???>"
+                                    ),
+                                    n_errors=self.n_log_errors,
+                                    n_warnings=self.n_log_warnings,
+                                ),
+                            },
+                        }
                     )
 
-                client = slack.WebClient(token=NOTIFICATIONS_SLACK_TOKEN)
-                client.chat_postMessage(
-                    channel=NOTIFICATIONS_SLACK_CHANNEL, text=message
+                blocks.append(
+                    {
+                        "type": "section",
+                        "text": {
+                            "type": "mrkdwn",
+                            "text": f"Logs tail:\n ```{log_tail(self.log)}```",
+                        },
+                    }
                 )
 
-            # TODO: implement email
-            #   (see https://docs.djangoproject.com/en/2.2/topics/email/)
+                if BASE_URL and TASK_MANAGER_SHOW_LOGVIEWER_LINK:
+                    blocks.append(
+                        {
+                            "type": "context",
+                            "elements": [
+                                {
+                                    "type": "mrkdwn",
+                                    "text": f"<{BASE_URL}/taskmanager/logviewer/{self.id}|Full logs>",
+                                }
+                            ],
+                        }
+                    )
+
+                for channel in NOTIFICATIONS_SLACK_CHANNELS:
+                    slack_client.chat_postMessage(channel=channel, blocks=blocks)
+                    # Fail silently
+
+            if NOTIFICATIONS_EMAIL_RECIPIENTS:
+                send_mail(
+                    "Subject here",
+                    "Here is the message.",
+                    NOTIFICATIONS_EMAIL_FROM,
+                    NOTIFICATIONS_EMAIL_RECIPIENTS,
+                    fail_silently=True,
+                )
 
     class Meta:
         """Django model options."""
@@ -372,7 +446,7 @@ class Task(models.Model):
             try:
                 self.spooler_id = task_id.decode("utf-8")
             except AttributeError:
-                # NOTE: this occurs when no UWSGI is loaded (e.g. during tests)
+                # NOTE: this occurs when no uWSGI is loaded (e.g. during tests)
                 pass
         self.cached_next_ride = self.get_next_ride()
         self.keep_last_n_reports()
@@ -380,10 +454,10 @@ class Task(models.Model):
 
     def keep_last_n_reports(self):
         """Delete all task's reports but a number defined in settings."""
-        if getattr(settings, "TASK_MANAGER_N_REPORTS_INLINE", 0) > 0:
+        if TASK_MANAGER_N_REPORTS_INLINE > 0:
             last_n_reports_ids = (
                 Report.objects.filter(task=self)
-                .order_by("-id")[: settings.TASK_MANAGER_N_REPORTS_INLINE]
+                .order_by("-id")[:TASK_MANAGER_N_REPORTS_INLINE]
                 .values_list("id", flat=True)
             )
             Report.objects.filter(task=self).exclude(
