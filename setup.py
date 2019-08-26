@@ -38,6 +38,10 @@ setup(
         "uwsgidecorators-fallback>=0.0.3",
         "uwsgidecorators>=1.1.0",
     ],
+    extras_require={
+        "optional": ["uwsgi"],
+        "lint": ["flake8"],
+    },
     keywords=[
         "async",
         "cron",
