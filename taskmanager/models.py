@@ -9,7 +9,14 @@ from django.conf import settings
 from django.core.management import load_command_class
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+import slack
 
+from taskmanager.settings import (
+    NOTIFICATIONS_SLACK_TOKEN,
+    NOTIFICATIONS_SLACK_CHANNEL,
+    NOTIFICATIONS_FAILURE_MESSAGE,
+    NOTIFICATIONS_WARNINGS_MESSAGE,
+)
 from taskmanager.tasks import exec_command_task
 
 
@@ -87,6 +94,33 @@ class Report(models.Model):
         except FileNotFoundError:
             log_lines = self.log.split("\n")
         return log_lines
+
+    def emit_notification(self):
+
+        if self.invocation_result != self.RESULT_OK:
+
+            if NOTIFICATIONS_SLACK_TOKEN and NOTIFICATIONS_SLACK_CHANNEL:
+
+                if self.invocation_result == self.RESULT_FAILED:
+                    message = NOTIFICATIONS_FAILURE_MESSAGE.format(
+                        task_name=self.task.name,
+                        invocation_time=self.invocation_datetime,
+                    )
+                else:
+                    message = NOTIFICATIONS_WARNINGS_MESSAGE.format(
+                        task_name=self.task.name,
+                        invocation_time=self.invocation_datetime,
+                        n_errors=self.n_log_errors,
+                        n_warnings=self.n_log_warnings,
+                    )
+
+                client = slack.WebClient(token=NOTIFICATIONS_SLACK_TOKEN)
+                client.chat_postMessage(
+                    channel=NOTIFICATIONS_SLACK_CHANNEL, text=message
+                )
+
+            # TODO: implement email
+            #   (see https://docs.djangoproject.com/en/2.2/topics/email/)
 
     class Meta:
         """Django model options."""
