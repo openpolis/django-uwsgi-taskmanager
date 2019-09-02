@@ -187,12 +187,27 @@ class Report(models.Model):
                     slack_client.chat_postMessage(channel=channel, blocks=blocks)
                     # Fail silently
 
-            if NOTIFICATIONS_EMAIL_RECIPIENTS:
+            email_settings = NOTIFICATIONS_EMAIL_FROM and NOTIFICATIONS_EMAIL_RECIPIENTS
+
+            if email_settings:
+
+                if self.invocation_result == self.RESULT_FAILED:
+                    subject = f"{self.task.name} failed"
+                    message = f"An error occurred: "
+                else:
+                    subject = f"{self.task.name} completed with warning"
+                    message = (
+                        f"{self.task.name}, "
+                        f"invoked at {self.invocation_datetime}, "
+                        f"completed with {self.n_log_warnings} warnings "
+                        f"and {self.n_log_errors} errors."
+                    )
+
                 send_mail(
-                    "Subject here",
-                    "Here is the message.",
-                    NOTIFICATIONS_EMAIL_FROM,
-                    NOTIFICATIONS_EMAIL_RECIPIENTS,
+                    subject=subject,
+                    message=message,
+                    from_email=NOTIFICATIONS_EMAIL_FROM,
+                    recipient_list=NOTIFICATIONS_EMAIL_RECIPIENTS,
                     fail_silently=True,
                 )
 
