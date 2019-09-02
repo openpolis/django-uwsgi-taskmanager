@@ -50,9 +50,16 @@ NOTIFICATIONS_WARNINGS_MESSAGE: str = getattr(
 )
 
 NOTIFICATIONS_EMAIL_FROM: str = getattr(
-    django_project_settings, "NOTIFICATIONS_EMAIL_FROM", "uwsgi-taskmanager@django.it"
+    django_project_settings, "NOTIFICATIONS_EMAIL_FROM", None
 )
 
 NOTIFICATIONS_EMAIL_RECIPIENTS: List[str] = getattr(
     django_project_settings, "NOTIFICATIONS_EMAIL_RECIPIENTS", []
 )
+
+# Email feature relies on Django built-in `send_mail()`.
+# Thus, an email backend (e.g. SMTP) should be configured by setting these options:
+# - EMAIL_HOST
+# - EMAIL_PORT
+# - EMAIL_HOST_USER
+# - EMAIL_HOST_PASSWORD
