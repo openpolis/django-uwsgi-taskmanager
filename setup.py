@@ -41,7 +41,6 @@ setup(
     extras_require={
         "optional": ["uwsgi"],
         "notifications": ["slackclient"],
-        "lint": ["flake8"],
         "dev": [
             "black>=19.3b0",
             "flake8-bugbear>=19.3.0",
