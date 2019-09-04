@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Update **black** settings in the `pyproject.toml` file
+- Update **flake8** and **isort** settings in `setup.cfg`
 
 ## [1.0.2] - 2019-07-23
 
