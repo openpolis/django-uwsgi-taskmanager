@@ -1,33 +1,32 @@
 """Define Django models for the taskmanager app."""
 
 import datetime
-from io import StringIO
 import os
-from pathlib import Path
 import re
+from io import StringIO
+from pathlib import Path
 
+import slack
 from django.conf import settings
 from django.core.mail import send_mail
-from django.core.management import call_command
-from django.core.management import load_command_class
+from django.core.management import call_command, load_command_class
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from file_read_backwards import FileReadBackwards
-import slack
 from uwsgidecoratorsfallback import spool
 
 from taskmanager.settings import (
-    NOTIFICATIONS_SLACK_TOKEN,
-    NOTIFICATIONS_FAILURE_MESSAGE,
-    NOTIFICATIONS_WARNINGS_MESSAGE,
-    NOTIFICATIONS_SLACK_CHANNELS,
-    TASK_MANAGER_SHOW_LOGVIEWER_LINK,
     BASE_URL,
+    NOTIFICATIONS_EMAIL_FROM,
     NOTIFICATIONS_EMAIL_RECIPIENTS,
+    NOTIFICATIONS_FAILURE_MESSAGE,
+    NOTIFICATIONS_SLACK_CHANNELS,
+    NOTIFICATIONS_SLACK_TOKEN,
+    NOTIFICATIONS_WARNINGS_MESSAGE,
+    TASK_MANAGER_N_LINES_IN_REPORT_LOG,
     TASK_MANAGER_N_REPORTS_INLINE,
     TASK_MANAGER_SAVE_LOGFILE,
-    TASK_MANAGER_N_LINES_IN_REPORT_LOG,
-    NOTIFICATIONS_EMAIL_FROM,
+    TASK_MANAGER_SHOW_LOGVIEWER_LINK,
 )
 from taskmanager.utils import log_tail
 
