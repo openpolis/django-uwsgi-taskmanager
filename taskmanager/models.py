@@ -6,7 +6,6 @@ import re
 from io import StringIO
 from pathlib import Path
 
-import slack
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.management import call_command, load_command_class
@@ -30,8 +29,10 @@ from taskmanager.settings import (
 )
 from taskmanager.utils import log_tail
 
-if NOTIFICATIONS_SLACK_TOKEN:
-    slack_client = slack.WebClient(token=NOTIFICATIONS_SLACK_TOKEN)
+try:
+    import slack
+except ImportError:
+    slack = None
 
 
 class AppCommand(models.Model):
@@ -113,7 +114,16 @@ class Report(models.Model):
 
         if self.invocation_result != self.RESULT_OK:
 
-            if NOTIFICATIONS_SLACK_TOKEN and NOTIFICATIONS_SLACK_CHANNELS:
+            slack_configured = all(
+                [slack, NOTIFICATIONS_SLACK_TOKEN, NOTIFICATIONS_SLACK_CHANNELS]
+            )
+            email_configured = all(
+                [NOTIFICATIONS_EMAIL_FROM, NOTIFICATIONS_EMAIL_RECIPIENTS]
+            )
+
+            if slack_configured:
+                slack_client = slack.WebClient(token=NOTIFICATIONS_SLACK_TOKEN)
+
                 blocks = [
                     {
                         "type": "context",
@@ -186,9 +196,7 @@ class Report(models.Model):
                     slack_client.chat_postMessage(channel=channel, blocks=blocks)
                     # Fail silently
 
-            email_settings = NOTIFICATIONS_EMAIL_FROM and NOTIFICATIONS_EMAIL_RECIPIENTS
-
-            if email_settings:
+            if email_configured:
 
                 if self.invocation_result == self.RESULT_FAILED:
                     subject = f"{self.task.name} failed"
