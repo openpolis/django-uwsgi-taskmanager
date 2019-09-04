@@ -462,12 +462,12 @@ class Task(models.Model):
         self.keep_last_n_reports()
         self.save(update_fields=("spooler_id", "status", "cached_next_ride"))
 
-    def keep_last_n_reports(self):
-        """Delete all task's reports but a number defined in settings."""
-        if TASK_MANAGER_N_REPORTS_INLINE > 0:
+    def keep_last_n_reports(self, n: int = TASK_MANAGER_N_REPORTS_INLINE):
+        """Delete all Task's Reports except latest `n` Reports."""
+        if n:
             last_n_reports_ids = (
                 Report.objects.filter(task=self)
-                .order_by("-id")[:TASK_MANAGER_N_REPORTS_INLINE]
+                .order_by("-id")[:n]
                 .values_list("id", flat=True)
             )
             Report.objects.filter(task=self).exclude(
