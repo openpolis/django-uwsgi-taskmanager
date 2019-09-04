@@ -30,7 +30,8 @@ help:
 	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
 
 black:	## format all Python code using black
-	black taskmanager tests demo --exclude venv
+	black .
+
 
 lint: ## check style with flake8
 	flake8
