@@ -32,6 +32,13 @@ help:
 black:	## format all Python code using black
 	black .
 
+check:  ## execute all checks (black, flake8, isort)
+	black --check .
+	flake8
+	isort --check-only --recursive
+
+checkcommit:  ## execute all pre-commit check and edits (black, flake8, isort)
+	pre-commit run --all-files
 
 lint: ## check style with flake8
 	flake8
