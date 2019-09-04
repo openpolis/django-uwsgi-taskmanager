@@ -318,11 +318,7 @@ class Task(models.Model):
     @property
     def last_report(self):
         """Get the last report of the task."""
-        try:
-            # NOTE: last() don't work with prefetch_related
-            return self.report_set.all()[0]
-        except IndexError:
-            return None
+        return self.report_set.order_by("invocation_datetime").last()
 
     @property
     def last_invocation_result(self):
