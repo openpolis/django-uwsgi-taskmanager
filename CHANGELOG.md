@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add `Makefile` with development command
+- Add an **extras_require** section (**dev**) in `setup.py`
 
 ### Changed
 
