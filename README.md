@@ -40,25 +40,25 @@ Django application to manage async tasks via admin interface, using uWSGI spoole
 
 4. Include the taskmanager URLConf in your project `urls.py` like this _(optional)_:
 
-```python
-from django.contrib import admin
-from django.urls import include, path
+    ```python
+    from django.contrib import admin
+    from django.urls import include, path
 
-urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("taskmanager/", include("taskmanager.urls")),
-]
-```
+    urlpatterns = [
+        path("admin/", admin.site.urls),
+        path("taskmanager/", include("taskmanager.urls")),
+    ]
+    ```
 
 5. Set parameters in your settings file as below _(optional)_:
 
-```pythonstub
-TASK_MANAGER_N_LINES_IN_REPORT_INLINE = 10
-TASK_MANAGER_N_REPORTS_INLINE = 3
-TASK_MANAGER_SHOW_LOGVIEWER_LINK = True
-TASK_MANAGER_USE_FILTER_COLLAPSE = True
-TASK_MANAGER_SAVE_LOGFILE = False
-```
+    ```pythonstub
+    TASK_MANAGER_N_LINES_IN_REPORT_INLINE = 10
+    TASK_MANAGER_N_REPORTS_INLINE = 3
+    TASK_MANAGER_SHOW_LOGVIEWER_LINK = True
+    TASK_MANAGER_USE_FILTER_COLLAPSE = True
+    TASK_MANAGER_SAVE_LOGFILE = False
+    ```
 
 ## Usage
 
@@ -77,7 +77,7 @@ uWSGI ini file (vassal) has to include the [spooler](https://uwsgi-docs.readthed
 
 This a basic Django demo project with a `uwsgi.ini` file and four directories (`media`, `spooler`, `static`, `venv`).
 
-``` 
+```
 demo/
 ├── demo/
 │   ├── __init__.py
