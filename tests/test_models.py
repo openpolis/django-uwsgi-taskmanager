@@ -1,6 +1,6 @@
 """Define taskmanager models tests."""
 
-from django.test import TestCase, tag
+from django.test import TestCase
 
 from taskmanager.models import AppCommand, Report, Task
 from taskmanager.settings import TASK_MANAGER_N_REPORTS_INLINE
@@ -88,27 +88,20 @@ class TestTaskModel(TestCase):
 
         Every time a Task is launched, a new Report should be generated.
         """
-
         initial_number_of_reports = Report.objects.all().count()
         final_expected_number_of_reports = initial_number_of_reports
-
         initial_latest_report = Report.objects.order_by("invocation_datetime").last()
-
         self.task1.launch()
         self.assertNotEqual(initial_latest_report, self.task1.last_report)
         final_expected_number_of_reports += 1
-
         self.task2.launch()
         self.assertNotEqual(self.task1.last_report, self.task2.last_report)
         final_expected_number_of_reports += 1
-
         # Cap expected number of reports
         reports_cap = Task.objects.all().count() * TASK_MANAGER_N_REPORTS_INLINE
         if final_expected_number_of_reports > reports_cap:
             final_expected_number_of_reports = reports_cap
-
         number_of_reports = Report.objects.all().count()
-
         self.assertEqual(number_of_reports, final_expected_number_of_reports)
 
 

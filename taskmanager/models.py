@@ -107,19 +107,16 @@ class Report(models.Model):
         return log_lines
 
     def emit_notification(self):
-
+        """Emit a slack or email notification."""
         if self.invocation_result != self.RESULT_OK:
-
             slack_configured = all(
                 [slack, NOTIFICATIONS_SLACK_TOKEN, NOTIFICATIONS_SLACK_CHANNELS]
             )
             email_configured = all(
                 [NOTIFICATIONS_EMAIL_FROM, NOTIFICATIONS_EMAIL_RECIPIENTS]
             )
-
             if slack_configured:
                 slack_client = slack.WebClient(token=NOTIFICATIONS_SLACK_TOKEN)
-
                 blocks = [
                     {
                         "type": "context",
@@ -164,7 +161,6 @@ class Report(models.Model):
                             },
                         }
                     )
-
                 blocks.append(
                     {
                         "type": "section",
@@ -174,7 +170,6 @@ class Report(models.Model):
                         },
                     }
                 )
-
                 if BASE_URL and TASK_MANAGER_SHOW_LOGVIEWER_LINK:
                     logviewer_url = reverse("log_viewer", args=(self.id,))
                     blocks.append(
@@ -188,13 +183,10 @@ class Report(models.Model):
                             ],
                         }
                     )
-
                 for channel in NOTIFICATIONS_SLACK_CHANNELS:
                     slack_client.chat_postMessage(channel=channel, blocks=blocks)
                     # Fail silently
-
             if email_configured:
-
                 if self.invocation_result == self.RESULT_FAILED:
                     subject = f"{self.task.name} failed"
                     message = f"An error occurred: "
@@ -206,7 +198,6 @@ class Report(models.Model):
                         f"completed with {self.n_log_warnings} warnings "
                         f"and {self.n_log_errors} errors."
                     )
-
                 send_mail(
                     subject=subject,
                     message=message,

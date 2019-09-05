@@ -142,6 +142,7 @@ class LoggingBaseCommand(BaseCommand):
             raise
 
     def create_parser(self, prog_name, subcommand, **kwargs):
+        """Create a parser."""
         parser = super().create_parser(prog_name, subcommand, **kwargs)
         parser.add_argument(
             "--disable-notifications", action="store_true", default=False

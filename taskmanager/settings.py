@@ -1,3 +1,5 @@
+"""Define settings for the taskmanager app."""
+
 from typing import List, Optional
 
 from django.conf import settings as django_project_settings

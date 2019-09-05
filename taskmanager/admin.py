@@ -24,8 +24,8 @@ def convert_to_local_dt(dt):
     """Convert datetime into local datetime, if django settings are set up to use TZ.
 
     Datetime fields in django store datetimes as UTC date, if the USE_TZ setting is set.
-    To have the correct datetime sent to the admin, without using django templating system,
-    the conversion needs to be done manually.
+    To have the correct datetime sent to the admin, without using the django templating
+    system, the conversion needs to be done manually.
     """
     try:
         if settings.USE_TZ:
