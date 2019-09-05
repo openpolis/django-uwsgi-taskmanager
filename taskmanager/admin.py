@@ -157,10 +157,9 @@ class TaskInline(admin.TabularInline):
             from django.utils.html import format_html
 
             if obj.last_report:
+                default_url = reverse("log_viewer", args=(obj.last_report.id,))
                 logviewer_url = getattr(
-                    settings,
-                    "TASK_MANAGER_LOGVIEWER_URL",
-                    f"/taskmanager/logviewer/{obj.last_report.id}",
+                    settings, "TASK_MANAGER_LOGVIEWER_URL", default_url
                 )
                 s = format_html(f'<a href="{logviewer_url}" target="_blank">{s}</a>')
         status_str += s + "/"
@@ -403,10 +402,9 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
             from django.utils.html import format_html
 
             if obj.last_report:
+                default_url = reverse("log_viewer", args=(obj.last_report.id,))
                 logviewer_url = getattr(
-                    settings,
-                    "TASK_MANAGER_LOGVIEWER_URL",
-                    f"/taskmanager/logviewer/{obj.last_report.id}",
+                    settings, "TASK_MANAGER_LOGVIEWER_URL", default_url
                 )
                 s = format_html(f'<a href="{logviewer_url}" target="_blank">{s}</a>')
         return s

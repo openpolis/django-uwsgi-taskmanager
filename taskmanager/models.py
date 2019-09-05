@@ -8,6 +8,7 @@ from io import StringIO
 from django.core.mail import send_mail
 from django.core.management import load_command_class
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 
 from taskmanager.settings import (
@@ -175,13 +176,14 @@ class Report(models.Model):
                 )
 
                 if BASE_URL and TASK_MANAGER_SHOW_LOGVIEWER_LINK:
+                    logviewer_url = reverse("log_viewer", args=(self.id,))
                     blocks.append(
                         {
                             "type": "context",
                             "elements": [
                                 {
                                     "type": "mrkdwn",
-                                    "text": f"<{BASE_URL}/taskmanager/logviewer/{self.id}|Full logs>",
+                                    "text": f"<{BASE_URL}/{logviewer_url}|Full logs>",
                                 }
                             ],
                         }
