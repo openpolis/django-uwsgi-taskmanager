@@ -11,6 +11,7 @@ Django application to manage async tasks via admin interface, using uWSGI spoole
 - Plan tasks as cron items
 - Check or download the generated reports/logs
 - Simply write a standard Django `Command` class (your app doesn't need to interact with Django uWSGI Taskmanager)
+- Get notifications via Slack or email when a task fails
 
 ## Installation
 
@@ -43,7 +44,7 @@ Django application to manage async tasks via admin interface, using uWSGI spoole
     ```python
     from django.contrib import admin
     from django.urls import include, path
-
+    
     urlpatterns = [
         path("admin/", admin.site.urls),
         path("taskmanager/", include("taskmanager.urls")),
@@ -72,6 +73,28 @@ You can disable some commands from the admin, and let users (with limited permis
 uWSGI ini file (vassal) has to include the [spooler](https://uwsgi-docs.readthedocs.io/en/latest/Spooler.html) and [pythonpath](https://uwsgi-docs.readthedocs.io/en/latest/PythonDecorators.html) option.
 
 > **NOTE**: remember to manually create the `spooler` directory with right permissions before start uWSGI
+
+## Enabling notifications
+
+To enable Slack notifications support for failing tasks, you have to first install the
+required packages, which are not included by default. To do that, just:
+
+    `pip install django-uwsgi-taskmanager[notifications]`
+    
+This will install the `django-uwsgi-taskmanager` package from PyPI, including the optional dependencies
+required to make Slack notifications work. 
+
+Email notifications are instead handled using Django [`django.core.mail`](https://docs.djangoproject.com/en/2.2/topics/email/) 
+module, so no further dependencies are needed and they should work out of the box.
+
+Then, you have to configure the following settings:
+
+- `NOTIFICATIONS_SLACK_TOKEN`, which must be set with you own Slack token as string.
+- `NOTIFICATIONS_SLACK_CHANNELS`, a list of strings representing the names or ids of the channels which will receive the notifications.
+- `NOTIFICATIONS_EMAIL_FROM`, the "from address" you want your outgoing notification emails to use.
+- `NOTIFICATIONS_EMAIL_RECIPIENTS`, a list of strings representing the recipients of the notifications.
+
+Additionally, for email notifications, you should configure at least one [email backend](https://docs.djangoproject.com/en/2.2/topics/email/#email-backends).
 
 ### Demo
 
@@ -167,7 +190,7 @@ Visit http://127.0.0.1:8000/admin/
 
 **Django uWSGI taskmanager** is an application to manage async tasks via admin interface, using uWSGI spooler.
 
-Copyright (C) 2019  Gabriele Giaccari, Gabriele Lucci, Guglielmo Celata, Paolo Melchiorre
+Copyright (C) 2019 Gabriele Giaccari, Gabriele Lucci, Guglielmo Celata, Paolo Melchiorre
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as
