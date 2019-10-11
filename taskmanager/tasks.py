@@ -9,6 +9,11 @@ from django.core.management import call_command
 from file_read_backwards import FileReadBackwards
 from uwsgidecoratorsfallback import spool
 
+from taskmanager.settings import (
+    TASK_MANAGER_N_LINES_IN_REPORT_LOG,
+    TASK_MANAGER_SAVE_LOGFILE,
+)
+
 
 @spool(pass_arguments=True)
 def exec_command_task(curr_task, *args, **kwargs):
@@ -26,7 +31,7 @@ def exec_command_task(curr_task, *args, **kwargs):
     n_log_errors = 0
     n_log_warnings = 0
     n_log_lines = 0
-    n_tail_lines = getattr(settings, "TASK_MANAGER_N_LINES_IN_REPORT_LOG", 10)
+    n_tail_lines = TASK_MANAGER_N_LINES_IN_REPORT_LOG
     log_tail_lines = []
     report = Report.objects.create(task=curr_task, logfile=report_logfile_path)
     result = Report.RESULT_OK
@@ -72,7 +77,7 @@ def exec_command_task(curr_task, *args, **kwargs):
             result = Report.RESULT_WARNINGS
         if n_log_errors:
             result = Report.RESULT_ERRORS
-    if not getattr(settings, "TASK_MANAGER_SAVE_LOGFILE", True):
+    if not TASK_MANAGER_SAVE_LOGFILE:
         try:
             os.unlink(report_logfile_path)
         except FileNotFoundError:
@@ -91,6 +96,7 @@ def exec_command_task(curr_task, *args, **kwargs):
             "n_log_warnings",
         )
     )
+    report.emit_notification()
     curr_task.cached_last_invocation_result = report.invocation_result
     curr_task.cached_last_invocation_n_errors = report.n_log_errors
     curr_task.cached_last_invocation_n_warnings = report.n_log_warnings

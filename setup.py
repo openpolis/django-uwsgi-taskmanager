@@ -38,6 +38,20 @@ setup(
         "uwsgidecorators-fallback>=0.0.3",
         "uwsgidecorators>=1.1.0",
     ],
+    extras_require={
+        "optional": ["uwsgi"],
+        "notifications": ["slackclient"],
+        "dev": [
+            "black>=19.3b0",
+            "bump2version",
+            "flake8-bugbear>=19.3.0",
+            "flake8-docstrings>=1.3.1",
+            "flake8-isort>=2.7.0",
+            "flake8>=3.7.8",
+            "isort>=4.3.21",
+            "pre-commit>=1.18.3",
+        ],
+    },
     keywords=[
         "async",
         "cron",

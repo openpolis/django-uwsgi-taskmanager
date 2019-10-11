@@ -10,17 +10,18 @@ Django application to manage async tasks via admin interface, using uWSGI spoole
 - Schedule tasks
 - Plan tasks as cron items
 - Check or download the generated reports/logs
-- Simply write a standard Django Command class (your app doesn't need to interact with Django uWSGI Taskmanager)
+- Simply write a standard Django `Command` class (your app doesn't need to interact with Django uWSGI Taskmanager)
+- Get notifications via Slack or email when a task fails
 
 ## Installation
 
-0.  Pip install the app:
+0.  Install the app with `pip`:
 
-    -  via pypi:
+    -  via PyPI:
 
        `pip install django-uwsgi-taskmanager`
 
-    -  or via github:
+    -  or via GitHub:
 
        `pip install git+https://github.com/openpolis/django-uwsgi-taskmanager.git`
 
@@ -38,12 +39,12 @@ Django application to manage async tasks via admin interface, using uWSGI spoole
 
 3. Run `python manage.py collectcommands` to create taskmanager commands.
 
-4. Include the taskmanager URLconf in your project `urls.py` like this _(optional)_:
+4. Include the taskmanager URLConf in your project `urls.py` like this _(optional)_:
 
     ```python
     from django.contrib import admin
     from django.urls import include, path
-
+    
     urlpatterns = [
         path("admin/", admin.site.urls),
         path("taskmanager/", include("taskmanager.urls")),
@@ -52,7 +53,7 @@ Django application to manage async tasks via admin interface, using uWSGI spoole
 
 5. Set parameters in your settings file as below _(optional)_:
 
-    ```
+    ```pythonstub
     TASK_MANAGER_N_LINES_IN_REPORT_INLINE = 10
     TASK_MANAGER_N_REPORTS_INLINE = 3
     TASK_MANAGER_SHOW_LOGVIEWER_LINK = True
@@ -73,11 +74,33 @@ uWSGI ini file (vassal) has to include the [spooler](https://uwsgi-docs.readthed
 
 > **NOTE**: remember to manually create the `spooler` directory with right permissions before start uWSGI
 
+## Enabling notifications
+
+To enable Slack notifications support for failing tasks, you have to first install the
+required packages, which are not included by default. To do that, just:
+
+    `pip install django-uwsgi-taskmanager[notifications]`
+    
+This will install the `django-uwsgi-taskmanager` package from PyPI, including the optional dependencies
+required to make Slack notifications work. 
+
+Email notifications are instead handled using Django [`django.core.mail`](https://docs.djangoproject.com/en/2.2/topics/email/) 
+module, so no further dependencies are needed and they should work out of the box.
+
+Then, you have to configure the following settings:
+
+- `NOTIFICATIONS_SLACK_TOKEN`, which must be set with you own Slack token as string.
+- `NOTIFICATIONS_SLACK_CHANNELS`, a list of strings representing the names or ids of the channels which will receive the notifications.
+- `NOTIFICATIONS_EMAIL_FROM`, the "from address" you want your outgoing notification emails to use.
+- `NOTIFICATIONS_EMAIL_RECIPIENTS`, a list of strings representing the recipients of the notifications.
+
+Additionally, for email notifications, you should configure at least one [email backend](https://docs.djangoproject.com/en/2.2/topics/email/#email-backends).
+
 ### Demo
 
 This a basic Django demo project with a `uwsgi.ini` file and four directories (`media`, `spooler`, `static`, `venv`).
 
-```bash
+```
 demo/
 ├── demo/
 │   ├── __init__.py
@@ -149,7 +172,7 @@ Collect all commands:
 (venv) $ python manage.py collectcommands
 ```
 
-Create a super user to login the admin:
+Create a super user to login to the admin interface:
 
 ```bash
 (venv) $ python manage.py createsuperuser
@@ -167,7 +190,7 @@ Visit http://127.0.0.1:8000/admin/
 
 **Django uWSGI taskmanager** is an application to manage async tasks via admin interface, using uWSGI spooler.
 
-Copyright (C) 2019  Gabriele Giaccari, Gabriele Lucci, Guglielmo Celata, Paolo Melchiorre
+Copyright (C) 2019 Gabriele Giaccari, Gabriele Lucci, Guglielmo Celata, Paolo Melchiorre
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as

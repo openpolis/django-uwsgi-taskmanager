@@ -1,8 +1,9 @@
 """Define taskmanager models tests."""
 
-from django.test import TestCase, tag
+from django.test import TestCase
 
 from taskmanager.models import AppCommand, Report, Task
+from taskmanager.settings import TASK_MANAGER_N_REPORTS_INLINE
 
 
 class TestAppCommandModel(TestCase):
@@ -35,10 +36,10 @@ class TestTaskModel(TestCase):
         self.task2, _ = Task.objects.get_or_create(
             name="task test 2", command=self.command_check, arguments=""
         )
-        self.report1, _ = Report.objects.get_or_create(
+        self.report1 = Report.objects.create(
             task=self.task1, invocation_result="ok", log=""
         )
-        self.report2, _ = Report.objects.get_or_create(
+        self.report2 = Report.objects.create(
             task=self.task1, invocation_result="ok", log=""
         )
 
@@ -81,15 +82,27 @@ class TestTaskModel(TestCase):
         """Test the str method to represent a task."""
         self.assertEqual(str(self.task1), "task test 1 (idle)")
 
-    @tag("async")
     def test_launch(self):
-        """Test task launch."""
+        """
+        Test task launch.
+
+        Every time a Task is launched, a new Report should be generated.
+        """
+        initial_number_of_reports = Report.objects.all().count()
+        final_expected_number_of_reports = initial_number_of_reports
+        initial_latest_report = Report.objects.order_by("invocation_datetime").last()
         self.task1.launch()
-        task1_new_report_generated = Report.objects.last()
-        self.assertEqual(self.task1.last_report, task1_new_report_generated)
+        self.assertNotEqual(initial_latest_report, self.task1.last_report)
+        final_expected_number_of_reports += 1
         self.task2.launch()
-        task2_new_report_generated = Report.objects.last()
-        self.assertEqual(self.task2.last_report, task2_new_report_generated)
+        self.assertNotEqual(self.task1.last_report, self.task2.last_report)
+        final_expected_number_of_reports += 1
+        # Cap expected number of reports
+        reports_cap = Task.objects.all().count() * TASK_MANAGER_N_REPORTS_INLINE
+        if final_expected_number_of_reports > reports_cap:
+            final_expected_number_of_reports = reports_cap
+        number_of_reports = Report.objects.all().count()
+        self.assertEqual(number_of_reports, final_expected_number_of_reports)
 
 
 class TestReportModel(TestCase):

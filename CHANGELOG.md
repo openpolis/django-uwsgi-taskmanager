@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Implement Slack and/or email notifications for failing tasks
+- Add an **extras_require** section (**notifications**) in `setup.py`
+- Add an **extras_require** section (**dev**) in `setup.py`
+- Add `Makefile` with development command
+
+### Changed
+
+- Update **black** settings in the `pyproject.toml` file
+- Update **flake8** and **isort** settings in `setup.cfg`
+- Remove hardcoded URLs and use url reverse method
+- Update and move coverage settings to `setup.cfg`
+
 ## [1.0.2] - 2019-07-23
 
 ### Added
