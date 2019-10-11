@@ -43,6 +43,7 @@ setup(
         "notifications": ["slackclient"],
         "dev": [
             "black>=19.3b0",
+            "bump2version",
             "flake8-bugbear>=19.3.0",
             "flake8-docstrings>=1.3.1",
             "flake8-isort>=2.7.0",
