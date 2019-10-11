@@ -9,8 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Add `Makefile` with development command
+- Implement Slack and/or email notifications for failing tasks
+- Add an **extras_require** section (**notifications**) in `setup.py`
 - Add an **extras_require** section (**dev**) in `setup.py`
+- Add `Makefile` with development command
 
 ### Changed
 
