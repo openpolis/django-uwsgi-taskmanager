@@ -79,13 +79,15 @@ uWSGI ini file (vassal) has to include the [spooler](https://uwsgi-docs.readthed
 To enable Slack notifications support for failing tasks, you have to first install the
 required packages, which are not included by default. To do that, just:
 
-    `pip install django-uwsgi-taskmanager[notifications]`
+    pip install django-uwsgi-taskmanager[notifications]
     
 This will install the `django-uwsgi-taskmanager` package from PyPI, including the optional dependencies
 required to make Slack notifications work. 
 
 Email notifications are instead handled using Django [`django.core.mail`](https://docs.djangoproject.com/en/2.2/topics/email/) 
-module, so no further dependencies are needed and they should work out of the box.
+module, so no further dependencies are needed and they should work out of the box, given you have at
+least one [email backend](https://docs.djangoproject.com/en/2.2/topics/email/#email-backends) properly
+configured.
 
 Then, you have to configure the following settings:
 
@@ -93,8 +95,6 @@ Then, you have to configure the following settings:
 - `NOTIFICATIONS_SLACK_CHANNELS`, a list of strings representing the names or ids of the channels which will receive the notifications.
 - `NOTIFICATIONS_EMAIL_FROM`, the "from address" you want your outgoing notification emails to use.
 - `NOTIFICATIONS_EMAIL_RECIPIENTS`, a list of strings representing the recipients of the notifications.
-
-Additionally, for email notifications, you should configure at least one [email backend](https://docs.djangoproject.com/en/2.2/topics/email/#email-backends).
 
 ### Demo
 
