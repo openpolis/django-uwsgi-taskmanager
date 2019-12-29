@@ -97,6 +97,7 @@ celerybeat-schedule
 
 # For OSX users
 .DS_Store
+.idea
 
 # SageMath parsed files
 

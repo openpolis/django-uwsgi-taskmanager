@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.3] - 2019-12-29
+
 ### Added
 
 - Implement Slack and/or email notifications for failing tasks
@@ -15,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `Makefile` with development command
 
 ### Changed
-
+- methods `has_add_permission()` signature in `admin.py`  adjusted to django 3
 - Update **black** settings in the `pyproject.toml` file
 - Update **flake8** and **isort** settings in `setup.cfg`
 - Remove hardcoded URLs and use url reverse method
