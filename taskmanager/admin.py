@@ -80,7 +80,7 @@ class ReportAdmin(ReportMixin, admin.ModelAdmin):
     ordering = ("-invocation_datetime", "-id")
     search_field = ("task__name", "task__status", "task__spooler_id")
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None):
         """Return False to avoid to add an object."""
         return False
 
@@ -127,7 +127,7 @@ class ReportInline(ReportMixin, admin.TabularInline):
     )
     show_change_link = True
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None):
         """Return False to avoid to add an object."""
         return False
 
@@ -186,7 +186,7 @@ class AppCommandAdmin(admin.ModelAdmin):
     readonly_fields = ("app_name", "name")
     search_field = ("app_name", "name")
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request, obj=None):
         """Return False to avoid to add an object."""
         return False
 

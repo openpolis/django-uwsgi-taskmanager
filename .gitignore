@@ -95,7 +95,11 @@ ipython_config.py
 # celery beat schedule file
 celerybeat-schedule
 
+# For OSX users
+.DS_Store
+
 # SageMath parsed files
+
 *.sage.py
 
 # Environments
