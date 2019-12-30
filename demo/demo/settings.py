@@ -129,3 +129,8 @@ STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, "static"))
 MEDIA_URL = "/media/"
 
 MEDIA_ROOT = os.path.abspath(os.path.join(BASE_DIR, "media"))
+
+TASK_MANAGER_N_REPORTS_INLINE = 5
+TASK_MANAGER_N_LINES_IN_REPORT_INLINE = 10
+TASK_MANAGER_SHOW_LOGVIEWER_LINK = True
+TASK_MANAGER_USE_FILTER_COLLAPSE = True
