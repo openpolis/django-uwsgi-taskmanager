@@ -11,16 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Settings to see log reports added to the demo project
 - Implement Slack and/or email notifications for failing tasks
-- Add an **extras_require** section (**notifications**) in `setup.py`
-- Add an **extras_require** section (**dev**) in `setup.py`
+- Add an `extras_require` section (`notifications`) in `setup.py`
+- Add an `extras_require` section (`dev`) in `setup.py`
 - Add `Makefile` with development command
 
 ### Changed
-
+- **Important**: All app settings are now prefixed "with UWSGI_TASKMANAGER_"
 - Logviewer template is now compatible with django 3 (and django 2)
 - methods `has_add_permission()` signature in `admin.py`  adjusted to django 3
-- Update **black** settings in the `pyproject.toml` file
-- Update **flake8** and **isort** settings in `setup.cfg`
+- Update `black` settings in the `pyproject.toml` file
+- Update `flake8` and `isort` settings in `setup.cfg`
 - Remove hardcoded URLs and use url reverse method
 - Update and move coverage settings to `setup.cfg`
 
