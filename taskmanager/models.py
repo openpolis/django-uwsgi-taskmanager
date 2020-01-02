@@ -177,7 +177,8 @@ class Report(models.Model):
                         },
                     }
                 )
-                if base_url := get_base_url():
+                base_url = get_base_url()
+                if base_url:
                     logviewer_url = reverse("log_viewer", args=(self.id,))
                     blocks.append(
                         {
