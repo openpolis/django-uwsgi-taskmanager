@@ -10,8 +10,8 @@ from file_read_backwards import FileReadBackwards
 from uwsgidecoratorsfallback import spool
 
 from taskmanager.settings import (
-    TASK_MANAGER_N_LINES_IN_REPORT_LOG,
-    TASK_MANAGER_SAVE_LOGFILE,
+    UWSGI_TASKMANAGER_N_LINES_IN_REPORT_LOG,
+    UWSGI_TASKMANAGER_SAVE_LOGFILE,
 )
 
 
@@ -31,7 +31,7 @@ def exec_command_task(curr_task, *args, **kwargs):
     n_log_errors = 0
     n_log_warnings = 0
     n_log_lines = 0
-    n_tail_lines = TASK_MANAGER_N_LINES_IN_REPORT_LOG
+    n_tail_lines = UWSGI_TASKMANAGER_N_LINES_IN_REPORT_LOG
     log_tail_lines = []
     report = Report.objects.create(task=curr_task, logfile=report_logfile_path)
     result = Report.RESULT_OK
@@ -77,7 +77,7 @@ def exec_command_task(curr_task, *args, **kwargs):
             result = Report.RESULT_WARNINGS
         if n_log_errors:
             result = Report.RESULT_ERRORS
-    if not TASK_MANAGER_SAVE_LOGFILE:
+    if not UWSGI_TASKMANAGER_SAVE_LOGFILE:
         try:
             os.unlink(report_logfile_path)
         except FileNotFoundError:

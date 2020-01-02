@@ -12,18 +12,18 @@ from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 
 from taskmanager.settings import (
-    BASE_URL,
-    NOTIFICATIONS_EMAIL_FROM,
-    NOTIFICATIONS_EMAIL_RECIPIENTS,
-    NOTIFICATIONS_FAILURE_MESSAGE,
-    NOTIFICATIONS_SLACK_CHANNELS,
-    NOTIFICATIONS_SLACK_TOKEN,
-    NOTIFICATIONS_WARNINGS_MESSAGE,
-    TASK_MANAGER_N_REPORTS_INLINE,
-    TASK_MANAGER_SHOW_LOGVIEWER_LINK,
+    UWSGI_TASKMANAGER_BASE_URL,
+    UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_FROM,
+    UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_RECIPIENTS,
+    UWSGI_TASKMANAGER_NOTIFICATIONS_FAILURE_MESSAGE,
+    UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_CHANNELS,
+    UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_TOKEN,
+    UWSGI_TASKMANAGER_NOTIFICATIONS_WARNINGS_MESSAGE,
+    UWSGI_TASKMANAGER_N_REPORTS_INLINE,
+    UWSGI_TASKMANAGER_SHOW_LOGVIEWER_LINK,
 )
 from taskmanager.tasks import exec_command_task
-from taskmanager.utils import log_tail
+from taskmanager.utils import log_tail, get_base_url
 
 try:
     import slack  # noqa
@@ -110,13 +110,13 @@ class Report(models.Model):
         """Emit a slack or email notification."""
         if self.invocation_result != self.RESULT_OK:
             slack_configured = all(
-                [slack, NOTIFICATIONS_SLACK_TOKEN, NOTIFICATIONS_SLACK_CHANNELS]
+                [slack, UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_TOKEN, UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_CHANNELS]
             )
             email_configured = all(
-                [NOTIFICATIONS_EMAIL_FROM, NOTIFICATIONS_EMAIL_RECIPIENTS]
+                [UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_FROM, UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_RECIPIENTS]
             )
             if slack_configured:
-                slack_client = slack.WebClient(token=NOTIFICATIONS_SLACK_TOKEN)
+                slack_client = slack.WebClient(token=UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_TOKEN)
                 blocks = [
                     {
                         "type": "context",
@@ -131,7 +131,7 @@ class Report(models.Model):
                             "type": "section",
                             "text": {
                                 "type": "mrkdwn",
-                                "text": NOTIFICATIONS_FAILURE_MESSAGE.format(
+                                "text": UWSGI_TASKMANAGER_NOTIFICATIONS_FAILURE_MESSAGE.format(
                                     task_name=self.task.name,
                                     invocation_time=(
                                         "<!date"
@@ -148,7 +148,7 @@ class Report(models.Model):
                             "type": "section",
                             "text": {
                                 "type": "mrkdwn",
-                                "text": NOTIFICATIONS_WARNINGS_MESSAGE.format(
+                                "text": UWSGI_TASKMANAGER_NOTIFICATIONS_WARNINGS_MESSAGE.format(
                                     task_name=self.task.name,
                                     invocation_time=(
                                         "<!date"
@@ -183,7 +183,7 @@ class Report(models.Model):
                             ],
                         }
                     )
-                for channel in NOTIFICATIONS_SLACK_CHANNELS:
+                for channel in UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_CHANNELS:
                     slack_client.chat_postMessage(channel=channel, blocks=blocks)
                     # Fail silently
             if email_configured:
@@ -201,8 +201,8 @@ class Report(models.Model):
                 send_mail(
                     subject=subject,
                     message=message,
-                    from_email=NOTIFICATIONS_EMAIL_FROM,
-                    recipient_list=NOTIFICATIONS_EMAIL_RECIPIENTS,
+                    from_email=UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_FROM,
+                    recipient_list=UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_RECIPIENTS,
                     fail_silently=True,
                 )
 
@@ -458,7 +458,7 @@ class Task(models.Model):
         self.keep_last_n_reports()
         self.save(update_fields=("spooler_id", "status", "cached_next_ride"))
 
-    def keep_last_n_reports(self, n: int = TASK_MANAGER_N_REPORTS_INLINE):
+    def keep_last_n_reports(self, n: int = UWSGI_TASKMANAGER_N_REPORTS_INLINE):
         """Delete all Task's Reports except latest `n` Reports."""
         if n:
             last_n_reports_ids = (

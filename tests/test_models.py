@@ -3,7 +3,7 @@
 from django.test import TestCase
 
 from taskmanager.models import AppCommand, Report, Task
-from taskmanager.settings import TASK_MANAGER_N_REPORTS_INLINE
+from taskmanager.settings import UWSGI_TASKMANAGER_N_REPORTS_INLINE
 
 
 class TestAppCommandModel(TestCase):
@@ -98,7 +98,7 @@ class TestTaskModel(TestCase):
         self.assertNotEqual(self.task1.last_report, self.task2.last_report)
         final_expected_number_of_reports += 1
         # Cap expected number of reports
-        reports_cap = Task.objects.all().count() * TASK_MANAGER_N_REPORTS_INLINE
+        reports_cap = Task.objects.all().count() * UWSGI_TASKMANAGER_N_REPORTS_INLINE
         if final_expected_number_of_reports > reports_cap:
             final_expected_number_of_reports = reports_cap
         number_of_reports = Report.objects.all().count()

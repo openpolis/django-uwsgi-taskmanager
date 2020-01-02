@@ -12,10 +12,10 @@ from pytz import timezone
 
 from taskmanager.models import AppCommand, Report, Task, TaskCategory
 from taskmanager.settings import (
-    TASK_MANAGER_N_LINES_IN_REPORT_INLINE,
-    TASK_MANAGER_N_REPORTS_INLINE,
-    TASK_MANAGER_SHOW_LOGVIEWER_LINK,
-    TASK_MANAGER_USE_FILTER_COLLAPSE,
+    UWSGI_TASKMANAGER_N_LINES_IN_REPORT_INLINE,
+    UWSGI_TASKMANAGER_N_REPORTS_INLINE,
+    UWSGI_TASKMANAGER_SHOW_LOGVIEWER_LINK,
+    UWSGI_TASKMANAGER_USE_FILTER_COLLAPSE,
 )
 from taskmanager.utils import log_tail
 
@@ -47,10 +47,10 @@ class ReportMixin(object):
     @mark_safe
     def log_tail(self, obj):
         """Return the last lines of the log and a link to a logviewer."""
-        n_max_lines = TASK_MANAGER_N_LINES_IN_REPORT_INLINE
+        n_max_lines = UWSGI_TASKMANAGER_N_LINES_IN_REPORT_INLINE
         lines = "<pre>"
         lines += log_tail(obj.log, n_max_lines)
-        if getattr(settings, "TASK_MANAGER_SHOW_LOGVIEWER_LINK", False):
+        if getattr(settings, "UWSGI_TASKMANAGER_SHOW_LOGVIEWER_LINK", False):
             lines += ugettext_lazy(
                 (
                     "\n\nShow the: <a href='{0}' target='_blank'>"
@@ -104,7 +104,7 @@ class ReportInlineFormset(BaseInlineFormSet):
         return last n_reports
         """
         super().__init__(*args, **kwargs)
-        n_reports = TASK_MANAGER_N_REPORTS_INLINE
+        n_reports = UWSGI_TASKMANAGER_N_REPORTS_INLINE
         self.queryset = self.model._default_manager.filter(
             **{self.fk.name: self.instance}
         ).order_by("-invocation_datetime")[:n_reports]
@@ -116,7 +116,7 @@ class ReportInline(ReportMixin, admin.TabularInline):
     extra = 0
     fields = ("invocation_result", "invocation_datetime", "log_tail")
     formset = ReportInlineFormset
-    max_num = TASK_MANAGER_N_REPORTS_INLINE
+    max_num = UWSGI_TASKMANAGER_N_REPORTS_INLINE
     model = Report
     readonly_fields = (
         "invocation_result",
@@ -153,7 +153,7 @@ class TaskInline(admin.TabularInline):
             )
         except AttributeError:
             s = "-"
-        if TASK_MANAGER_SHOW_LOGVIEWER_LINK:
+        if UWSGI_TASKMANAGER_SHOW_LOGVIEWER_LINK:
             from django.utils.html import format_html
 
             if obj.last_report:
@@ -398,7 +398,7 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
             )
         except (AttributeError, TypeError):
             s = "-"
-        if getattr(settings, "TASK_MANAGER_SHOW_LOGVIEWER_LINK", False):
+        if getattr(settings, "UWSGI_TASKMANAGER_SHOW_LOGVIEWER_LINK", False):
             from django.utils.html import format_html
 
             if obj.last_report:
@@ -433,5 +433,5 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
     class Media:
         """Task Admin asset definitions."""
 
-        if TASK_MANAGER_USE_FILTER_COLLAPSE:
+        if UWSGI_TASKMANAGER_USE_FILTER_COLLAPSE:
             js = ["/static/js/menu_filter_collapse.js"]
