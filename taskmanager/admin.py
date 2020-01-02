@@ -51,12 +51,13 @@ class ReportMixin(object):
         lines = "<pre>"
         lines += log_tail(obj.log, n_max_lines)
         if getattr(settings, "UWSGI_TASKMANAGER_SHOW_LOGVIEWER_LINK", False):
+            last_report_url = reverse("log_viewer", args=(obj.pk,))
             lines += ugettext_lazy(
                 (
-                    "\n\nShow the: <a href='{0}' target='_blank'>"
+                    "\n\nShow the <a href='{0}' target='_blank'>"
                     "complete log with filters</a>"
                 )
-            ).format(reverse("log_viewer", args=(obj.pk,)))
+            ).format(last_report_url)
         lines += "</pre>"
         return lines
 
@@ -157,11 +158,8 @@ class TaskInline(admin.TabularInline):
             from django.utils.html import format_html
 
             if obj.last_report:
-                default_url = reverse("log_viewer", args=(obj.last_report.id,))
-                logviewer_url = getattr(
-                    settings, "TASK_MANAGER_LOGVIEWER_URL", default_url
-                )
-                s = format_html(f'<a href="{logviewer_url}" target="_blank">{s}</a>')
+                last_report_url = reverse("log_viewer", args=(obj.last_report.id,))
+                s = format_html(f'<a href="{last_report_url}" target="_blank">{s}</a>')
         status_str += s + "/"
         if obj.cached_next_ride:
             s = f"{convert_to_local_dt(obj.cached_next_ride)}"
@@ -402,11 +400,8 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
             from django.utils.html import format_html
 
             if obj.last_report:
-                default_url = reverse("log_viewer", args=(obj.last_report.id,))
-                logviewer_url = getattr(
-                    settings, "TASK_MANAGER_LOGVIEWER_URL", default_url
-                )
-                s = format_html(f'<a href="{logviewer_url}" target="_blank">{s}</a>')
+                last_report_url = reverse("log_viewer", args=(obj.last_report.id,))
+                s = format_html(f'<a href="{last_report_url}" target="_blank">{s}</a>')
         return s
 
     last_result_str.short_description = "Last result"
