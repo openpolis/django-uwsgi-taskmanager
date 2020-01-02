@@ -12,18 +12,16 @@ from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 
 from taskmanager.settings import (
-    UWSGI_TASKMANAGER_BASE_URL,
+    UWSGI_TASKMANAGER_N_REPORTS_INLINE,
     UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_FROM,
     UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_RECIPIENTS,
     UWSGI_TASKMANAGER_NOTIFICATIONS_FAILURE_MESSAGE,
     UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_CHANNELS,
     UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_TOKEN,
     UWSGI_TASKMANAGER_NOTIFICATIONS_WARNINGS_MESSAGE,
-    UWSGI_TASKMANAGER_N_REPORTS_INLINE,
-    UWSGI_TASKMANAGER_SHOW_LOGVIEWER_LINK,
 )
 from taskmanager.tasks import exec_command_task
-from taskmanager.utils import log_tail, get_base_url
+from taskmanager.utils import get_base_url, log_tail
 
 try:
     import slack  # noqa
@@ -110,13 +108,22 @@ class Report(models.Model):
         """Emit a slack or email notification."""
         if self.invocation_result != self.RESULT_OK:
             slack_configured = all(
-                [slack, UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_TOKEN, UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_CHANNELS]
+                [
+                    slack,
+                    UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_TOKEN,
+                    UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_CHANNELS,
+                ]
             )
             email_configured = all(
-                [UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_FROM, UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_RECIPIENTS]
+                [
+                    UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_FROM,
+                    UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_RECIPIENTS,
+                ]
             )
             if slack_configured:
-                slack_client = slack.WebClient(token=UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_TOKEN)
+                slack_client = slack.WebClient(
+                    token=UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_TOKEN
+                )
                 blocks = [
                     {
                         "type": "context",
@@ -170,7 +177,7 @@ class Report(models.Model):
                         },
                     }
                 )
-                if BASE_URL and TASK_MANAGER_SHOW_LOGVIEWER_LINK:
+                if base_url := get_base_url():
                     logviewer_url = reverse("log_viewer", args=(self.id,))
                     blocks.append(
                         {
@@ -178,7 +185,7 @@ class Report(models.Model):
                             "elements": [
                                 {
                                     "type": "mrkdwn",
-                                    "text": f"<{BASE_URL}/{logviewer_url}|Full logs>",
+                                    "text": f"<http://{base_url}{logviewer_url}|Full logs>",
                                 }
                             ],
                         }
@@ -443,6 +450,7 @@ class Task(models.Model):
         try:
             task_id = exec_command_task.spool(self, **kwargs)
         except Exception as e:
+            # TODO: better handle exception, might cause unexpected behaviours
             Report.objects.create(
                 task=self,
                 invocation_result=Report.RESULT_FAILED,
