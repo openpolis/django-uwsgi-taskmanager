@@ -4,7 +4,9 @@ from typing import List, Optional
 
 from django.conf import settings as django_project_settings
 
-UWSGI_TASKMANAGER_BASE_URL: Optional[str] = getattr(django_project_settings, "BASE_URL", None)
+UWSGI_TASKMANAGER_BASE_URL: Optional[str] = getattr(
+    django_project_settings, "UWSGI_TASKMANAGER_BASE_URL", None
+)
 
 UWSGI_TASKMANAGER_N_LINES_IN_REPORT_LOG: int = getattr(
     django_project_settings, "UWSGI_TASKMANAGER_N_LINES_IN_REPORT_LOG", 10
