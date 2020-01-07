@@ -52,6 +52,13 @@ setup(
             "isort>=4.3.21",
             "pre-commit>=1.18.3",
         ],
+        "docs": [
+            "sphinx",
+            "sphinx-django-command",
+            "sphinx-rtd-theme",
+            "sphinx-autobuild",
+            "pyembed-rst"
+        ]
     },
     keywords=[
         "async",
