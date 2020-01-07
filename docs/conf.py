@@ -29,9 +29,9 @@ PyEmbedRst().register()
 
 project = "Django uWSGI taskmanager"
 copyright = (
-    "2019, Gabriele Giaccari, Gabriele Lucci, Guglielmo Celata, Paolo Melchiorre"
+    "2019, G. Giaccari, G. Lucci, G. Celata, P. Melchiorre"
 )
-author = "Gabriele Giaccari, Gabriele Lucci, Guglielmo Celata, Paolo Melchiorre"
+author = "G. Giaccari, G. Lucci, G. Celata, P. Melchiorre"
 
 # The full version, including alpha/beta/rc tags
 release = "1.0.2"
