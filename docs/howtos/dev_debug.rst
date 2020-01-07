@@ -1,5 +1,5 @@
-How to debug tasks scheduling
------------------------------
+How to debug tasks
+------------------
 
 Since the uwsgi uses the spooler processes, debugging the task execution in these process requires
 a hack through remote debugging.
