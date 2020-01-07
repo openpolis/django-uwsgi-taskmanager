@@ -8,7 +8,7 @@ This documentation is written using sphinx_. It follows the `guidelines on writi
 set by Daniele Procida, and is contained in the ``docs`` directory of the project.
 
 In order to contribute to the documentation, the following packages should be added to the virtualenv
-on the developer machine::
+on the developer machine:
 
 .. code-block::
 
