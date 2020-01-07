@@ -69,6 +69,8 @@ class LoggingBaseCommand(BaseCommand):
     management command subclassing LoggingBaseCommand, and invoke the parent's handle
     method in the `handle()` method, before the rest of the handle logic.
 
+    .. code-block:: python
+
         from django_extensions.management.base import LoggingBaseCommand
 
         class Command(LoggingBaseCommand):

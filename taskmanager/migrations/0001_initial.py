@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ("app_name", models.CharField(max_length=100)),
                 ("active", models.BooleanField(default=True)),
             ],
-            options={"verbose_name": "Command", "verbose_name_plural": "Commands", },
+            options={"verbose_name": "Command", "verbose_name_plural": "Commands",},
         ),
         migrations.CreateModel(
             name="TaskCategory",
@@ -66,7 +66,7 @@ class Migration(migrations.Migration):
                     models.TextField(
                         blank=True,
                         help_text='Separate arguments with a comma ","and parameters with a blank space " ". '
-                        'eg: -f, --secondarg param1 param2, --thirdarg=pippo, --thirdarg',
+                        "eg: -f, --secondarg param1 param2, --thirdarg=pippo, --thirdarg",
                     ),
                 ),
                 (
@@ -176,7 +176,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"verbose_name": "Task", "verbose_name_plural": "Tasks", },
+            options={"verbose_name": "Task", "verbose_name_plural": "Tasks",},
         ),
         migrations.CreateModel(
             name="Report",
@@ -228,6 +228,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            options={"verbose_name": "Report", "verbose_name_plural": "Reports", },
+            options={"verbose_name": "Report", "verbose_name_plural": "Reports",},
         ),
     ]

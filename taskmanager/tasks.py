@@ -16,7 +16,7 @@ from taskmanager.settings import (
 
 
 @spool(pass_arguments=True)
-def exec_command_task(curr_task, *args, **kwargs):
+def exec_command_task(curr_task):
     """Execute the command of a Task."""
     from taskmanager.models import Report, Task
 

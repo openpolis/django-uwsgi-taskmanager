@@ -295,15 +295,43 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
         "repetition_str",
         "last_result_str",
         "next_ride_str",
+        "cached_last_invocation_n_errors",
+        "cached_last_invocation_n_warnings",
     )
     list_filter = ("status", "cached_last_invocation_result", "category")
     ordering = ("name",)
+    fieldsets = (
+        (
+            "Definition",
+            {"fields": ("name", "command", "arguments", "category", "note")},
+        ),
+        (
+            "Scheduling",
+            {"fields": ("scheduling", "repetition_period", "repetition_rate")},
+        ),
+        (
+            "Last execution",
+            {
+                "fields": (
+                    "spooler_id",
+                    "status",
+                    "cached_last_invocation_datetime",
+                    "cached_last_invocation_result",
+                    "cached_next_ride",
+                    "cached_last_invocation_n_errors",
+                    "cached_last_invocation_n_warnings",
+                )
+            },
+        ),
+    )
     readonly_fields = (
         "spooler_id",
         "status",
         "cached_last_invocation_result",
         "cached_last_invocation_datetime",
         "cached_next_ride",
+        "cached_last_invocation_n_errors",
+        "cached_last_invocation_n_warnings",
     )
     save_as = True
     save_on_top = True
