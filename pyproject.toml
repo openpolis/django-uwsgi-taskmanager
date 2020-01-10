@@ -1,3 +1,6 @@
+[build-system]
+requires = ["setuptools", "wheel"] 
+
 [tool.black]
 target-version = ['py37']
 exclude = "(.eggs|.git|.hg|.mypy_cache|.nox|.tox|.venv|_build|buck-out|build|dist|venv)"
