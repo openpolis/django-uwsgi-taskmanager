@@ -1,5 +1,6 @@
 [build-system]
-requires = ["setuptools", "wheel"] 
+requires = ["setuptools", "wheel"]
+build-backend = "wheel"
 
 [tool.black]
 target-version = ['py37']
