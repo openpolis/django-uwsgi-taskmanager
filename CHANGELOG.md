@@ -5,10 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - Will be 1.0.3
+## [unchanged]
+
+
+## [2.0.0] - 2020-01-11
 
 ### Added
 
+- Add sphinx documentation under `docs/`, with ReadTheDocs configuration.
+- Compatibility with django 3.0 added
 - Settings to see log reports added to the demo project
 - Implement Slack and/or email notifications for failing tasks
 - Add an `extras_require` section (`notifications`) in `setup.py`
@@ -17,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - **Important**: All app settings are now prefixed "with UWSGI_TASKMANAGER_"
+- Sections added to Task edit form in admin site.
 - Logviewer template is now compatible with django 3 (and django 2)
 - methods `has_add_permission()` signature in `admin.py`  adjusted to django 3
 - Update `black` settings in the `pyproject.toml` file
@@ -65,7 +71,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - First release
 
-[Unreleased]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v1.0.2...master
+
+[unchanged]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.0.0...master
+[2.0.0]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v1.0.2...v2.0.0
 [1.0.2]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/openpolis/django-uwsgi-taskmanager/releases/tag/v1.0.0
