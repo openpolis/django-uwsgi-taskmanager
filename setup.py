@@ -10,10 +10,10 @@ import taskmanager
 os.chdir(os.path.normpath(os.path.join(os.path.abspath(__file__), os.pardir)))
 
 setup(
-    author_email="info@openpolis.it",
+    author_email="lab@openpolis.it",
     author="Gabriele Giaccari, Gabriele Lucci, Guglielmo Celata, Paolo Melchiorre",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 4 - Beta",
         "Environment :: Web Environment",
         "Framework :: Django :: 1.11",
         "Framework :: Django :: 2.0",
