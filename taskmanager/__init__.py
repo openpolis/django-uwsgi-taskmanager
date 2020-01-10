@@ -1,7 +1,7 @@
 """Django application to manage async tasks via admin interface, using uWSGI spooler."""
 
 # PEP 440 - version number format
-VERSION = (1, 0, 2)
+VERSION = (2, 0, 0)
 
 # PEP 396 - module version variable
 __version__ = ".".join(map(str, VERSION))
