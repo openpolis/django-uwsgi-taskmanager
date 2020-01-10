@@ -54,11 +54,11 @@ Django application to manage async tasks via admin interface, using uWSGI spoole
 5. Set parameters in your settings file as below _(optional)_:
 
     ```pythonstub
-    TASK_MANAGER_N_LINES_IN_REPORT_INLINE = 10
-    TASK_MANAGER_N_REPORTS_INLINE = 3
-    TASK_MANAGER_SHOW_LOGVIEWER_LINK = True
-    TASK_MANAGER_USE_FILTER_COLLAPSE = True
-    TASK_MANAGER_SAVE_LOGFILE = False
+    UWSGI_TASKMANAGER_N_LINES_IN_REPORT_INLINE = 10
+    UWSGI_TASKMANAGER_N_REPORTS_INLINE = 3
+    UWSGI_TASKMANAGER_SHOW_LOGVIEWER_LINK = True
+    UWSGI_TASKMANAGER_USE_FILTER_COLLAPSE = True
+    UWSGI_TASKMANAGER_SAVE_LOGFILE = False
     ```
 
 ## Usage
@@ -91,10 +91,10 @@ configured.
 
 Then, you have to configure the following settings:
 
-- `NOTIFICATIONS_SLACK_TOKEN`, which must be set with you own Slack token as string.
-- `NOTIFICATIONS_SLACK_CHANNELS`, a list of strings representing the names or ids of the channels which will receive the notifications.
-- `NOTIFICATIONS_EMAIL_FROM`, the "from address" you want your outgoing notification emails to use.
-- `NOTIFICATIONS_EMAIL_RECIPIENTS`, a list of strings representing the recipients of the notifications.
+- `UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_TOKEN`, which must be set with you own Slack token as string.
+- `UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_CHANNELS`, a list of strings representing the names or ids of the channels which will receive the notifications.
+- `UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_FROM`, the "from address" you want your outgoing notification emails to use.
+- `UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_RECIPIENTS`, a list of strings representing the recipients of the notifications.
 
 ### Demo
 
