@@ -4,6 +4,8 @@
 
 Django application to manage async tasks via admin interface, using uWSGI spooler.
 
+See documentation at https://django-uwsgi-taskmanager.readthedocs.io/en/latest/
+
 ## Features
 
 - Start and stop your tasks via admin
