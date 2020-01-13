@@ -5,21 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [unchanged]
+## [unreleased]
 
-## [2.0.3]
+### Changed
+
+- documentation link added to README
+
+
+## [2.0.3] - 2020-01-11
 
 ### Changed
 
 - test, build and publish workflows refactored and corrected
 
-## [2.0.2]
+## [2.0.2] - 2020-01-11
 
 ### Changed
 
 - publishing to pypi test and production environment splitted into two actions
 
-## [2.0.1]
+## [2.0.1] - 2020-01-11
 
 ### Added
 
@@ -90,7 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release
 
 
-[unchanged]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.0.3...master
+[unreleased]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.0.3...master
 [2.0.3]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.0.2...v2.0.3
 [2.0.2]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.0.0...v2.0.1
