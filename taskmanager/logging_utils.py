@@ -137,11 +137,13 @@ class LoggingBaseCommand(BaseCommand):
     def execute(self, *args, **options):
         """Execute method."""
         try:
-            super(LoggingBaseCommand, self).execute(*args, **options)
+            output = super(LoggingBaseCommand, self).execute(*args, **options)
         except Exception as e:
             logger = logging.getLogger("django.commands")
             logger.error(e, exc_info=sys.exc_info(), extra={"status_code": 500})
             raise
+
+        return output
 
     def create_parser(self, prog_name, subcommand, **kwargs):
         """Create a parser."""
