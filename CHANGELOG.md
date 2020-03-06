@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unpublished]
 
+### Changed
+
+- configuration for custom formset of reports in task admin change form improved; first login is now visible
+- javascript error corrected for dynamic tasks filter
 
 ## [2.0.4] - 2020-01-21
 
