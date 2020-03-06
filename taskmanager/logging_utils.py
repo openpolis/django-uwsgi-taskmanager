@@ -19,7 +19,7 @@ class NoTerminatorStreamHandler(logging.StreamHandler):
     """
 
     def __key(self):
-        return (self.name, self.level)
+        return self.name, self.level
 
     def __hash__(self):
         """Hash method."""
@@ -103,6 +103,7 @@ class LoggingBaseCommand(BaseCommand):
             self.logger.setLevel(logging.INFO)
         elif verbosity == 3:
             self.logger.setLevel(logging.DEBUG)
+
         # only add StreamHandler to non stdout/stderr streams
         # to avoid repetitions in log messages sent to console
         stdout_name = getattr(self.stdout, "name", None)

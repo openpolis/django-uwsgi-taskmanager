@@ -93,31 +93,15 @@ class ReportAdmin(ReportMixin, admin.ModelAdmin):
         return super().changeform_view(request, object_id, extra_context=extra_context)
 
 
-class ReportInlineFormset(BaseInlineFormSet):
-    """An inline formset for related reports."""
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initialize the exception.
-
-        number of reports shown is read from settings, defaults to 5 filter
-        reports related to current instance, order by invocation_datetime desc,
-        return last n_reports
-        """
-        super().__init__(*args, **kwargs)
-        n_reports = UWSGI_TASKMANAGER_N_REPORTS_INLINE
-        self.queryset = self.model._default_manager.filter(
-            **{self.fk.name: self.instance}
-        ).order_by("-invocation_datetime")[:n_reports]
-
-
 class ReportInline(ReportMixin, admin.TabularInline):
     """An inline for related reports."""
 
+    max_num = 5
     extra = 0
     fields = ("invocation_result", "invocation_datetime", "log_tail")
-    formset = ReportInlineFormset
-    max_num = UWSGI_TASKMANAGER_N_REPORTS_INLINE
+    # formset = ReportInlineFormset
+    # template = 'admin/edit_inline/tabular_reports.html'
+    ordering = ['-invocation_datetime', ]
     model = Report
     readonly_fields = (
         "invocation_result",
@@ -457,4 +441,4 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
         """Task Admin asset definitions."""
 
         if UWSGI_TASKMANAGER_USE_FILTER_COLLAPSE:
-            js = ["/static/js/menu_filter_collapse.js"]
+            js = ["//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js", "/static/js/menu_filter_collapse.js"]
