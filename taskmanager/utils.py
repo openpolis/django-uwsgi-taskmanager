@@ -6,7 +6,7 @@ from django.apps import apps
 from taskmanager.settings import UWSGI_TASKMANAGER_BASE_URL
 
 
-def log_tail(log, n_lines=10):
+def log_tail(log, n_lines: int = 10) -> Optional[str]:
     """Return the last lines of a log text."""
     lines = log.split("\n")
     hidden_lines = len(lines) - n_lines
@@ -20,6 +20,7 @@ def get_base_url() -> Optional[str]:
         # Check if "sites" framework is available; return current site domain.
         if apps.get_app_config("sites"):
             from django.contrib.sites.models import Site
+
             return Site.objects.get_current().domain
     except (LookupError, ImportError):
         pass
