@@ -35,6 +35,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "django>=1.11",
+        "pyuwsgi",
         "file-read-backwards>=2.0.0",
         "uwsgidecorators-fallback>=0.0.3",
         "uwsgidecorators>=1.1.0",
