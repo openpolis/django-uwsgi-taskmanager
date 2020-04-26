@@ -7,12 +7,13 @@ from pathlib import Path
 from django.conf import settings
 from django.core.management import call_command
 from file_read_backwards import FileReadBackwards
-from uwsgidecoratorsfallback import spool
+
 
 from taskmanager.settings import (
     UWSGI_TASKMANAGER_N_LINES_IN_REPORT_LOG,
     UWSGI_TASKMANAGER_SAVE_LOGFILE,
 )
+from taskmanager.uwsgidecorators_wrapper import spool
 
 
 @spool(pass_arguments=True)
@@ -47,6 +48,7 @@ def exec_command_task(curr_task):
         call_command(
             curr_task.command.name, *curr_task.complete_args, stdout=report_logfile
         )
+
         report_logfile.flush()
     except Exception as e:
         result = Report.RESULT_FAILED
@@ -96,7 +98,7 @@ def exec_command_task(curr_task):
             "n_log_warnings",
         )
     )
-    report.emit_notification()
+    # report.emit_notification()
     curr_task.cached_last_invocation_result = report.invocation_result
     curr_task.cached_last_invocation_n_errors = report.n_log_errors
     curr_task.cached_last_invocation_n_warnings = report.n_log_warnings
