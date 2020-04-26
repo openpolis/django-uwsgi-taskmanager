@@ -2,7 +2,7 @@
 
 from django.core import management
 
-from taskmanager.logging_utils import LoggingBaseCommand
+from taskmanager.management.base import LoggingBaseCommand
 
 
 class Command(LoggingBaseCommand):
