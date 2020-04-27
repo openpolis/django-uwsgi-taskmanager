@@ -101,7 +101,9 @@ class ReportInline(ReportMixin, admin.TabularInline):
     fields = ("invocation_result", "invocation_datetime", "log_tail")
     # formset = ReportInlineFormset
     # template = 'admin/edit_inline/tabular_reports.html'
-    ordering = ['-invocation_datetime', ]
+    ordering = [
+        "-invocation_datetime",
+    ]
     model = Report
     readonly_fields = (
         "invocation_result",
@@ -441,4 +443,7 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
         """Task Admin asset definitions."""
 
         if UWSGI_TASKMANAGER_USE_FILTER_COLLAPSE:
-            js = ["//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js", "/static/js/menu_filter_collapse.js"]
+            js = [
+                "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js",
+                "/static/js/menu_filter_collapse.js",
+            ]
