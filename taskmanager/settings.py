@@ -61,6 +61,27 @@ UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_RECIPIENTS: List[str] = getattr(
     django_project_settings, "UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_RECIPIENTS", []
 )
 
+UWSGI_TASKMANAGER_NOTIFICATION_HANDLERS = {
+    "slack": {
+        "class": "taskmanager.notifications.SlackNotificationHandler",
+        "level": "warnings",
+        "token": "<token>",
+        "channel": "id-or-name-of-channel",
+    },
+    "slack-all": {
+        "class": "taskmanager.notifications.SlackNotificationHandler",
+        "level": "ok",
+        "token": "<token>",
+        "channel": "id-or-name-of-channel",
+    },
+    "slack-failures": {
+        "class": "taskmanager.notifications.SlackNotificationHandler",
+        "level": "failure",
+        "token": "<token>",
+        "channel": "id-or-name-of-channel",
+    },
+}
+
 # Email feature relies on Django built-in `send_mail()`.
 # Thus, an email backend (e.g. SMTP) should be configured by setting these options:
 # - EMAIL_HOST
