@@ -4,24 +4,19 @@ import datetime
 from io import StringIO
 import os
 import re
+from typing import Collection
 
 from django.core.management import load_command_class
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from taskmanager.settings import (
-    UWSGI_TASKMANAGER_N_REPORTS_INLINE,
-    UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_FROM,
-    UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_RECIPIENTS,
-    UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_CHANNELS,
-    UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_TOKEN,
+from taskmanager.notifications import (
+    NotificationHandler,
+    invocation_result_to_level_map,
+    NotificationContext,
 )
+from taskmanager.settings import UWSGI_TASKMANAGER_N_REPORTS_INLINE
 from taskmanager.tasks import exec_command_task
-
-try:
-    import slack  # noqa
-except ImportError:  # pragma: no cover
-    slack = None  # noqa
 
 
 class AppCommand(models.Model):
@@ -99,26 +94,28 @@ class Report(models.Model):
             log_lines = self.log.split("\n")
         return log_lines
 
-    def emit_notification(self):
+    def _get_notification_ctx(self) -> NotificationContext:
+        return NotificationContext(
+            task_name=self.task.name,
+            invocation_time=int(self.invocation_datetime.timestamp()),
+            n_warnings=self.n_log_warnings,
+            n_errors=self.n_log_errors,
+        )
+
+    def emit_notifications(self):
         """Emit a slack or email notification."""
-        if self.invocation_result != self.RESULT_OK:
-            slack_configured = all(
-                [
-                    slack,
-                    UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_TOKEN,
-                    UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_CHANNELS,
-                ]
-            )
-            email_configured = all(
-                [
-                    UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_FROM,
-                    UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_RECIPIENTS,
-                ]
-            )
-            if slack_configured:
-                pass
-            if email_configured:
-                pass
+        if not self.invocation_result:
+            return
+
+        handlers: Collection[NotificationHandler]
+        handlers = self._meta.app_config.notification_handlers
+
+        level = invocation_result_to_level_map.get(self.invocation_result)
+        ctx = self._get_notification_ctx()
+
+        for handler in handlers:
+            if level and level >= handler.level:
+                handler.emit(ctx)
 
 
 class TaskCategory(models.Model):
