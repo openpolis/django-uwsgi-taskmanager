@@ -1,20 +1,14 @@
 """Define Django models for the taskmanager app."""
-
 import datetime
 from io import StringIO
 import os
 import re
-from typing import Collection
+from typing import Dict
 
 from django.core.management import load_command_class
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from taskmanager.notifications import (
-    NotificationHandler,
-    invocation_result_to_level_map,
-    NotificationContext,
-)
 from taskmanager.settings import UWSGI_TASKMANAGER_N_REPORTS_INLINE
 from taskmanager.tasks import exec_command_task
 
@@ -105,28 +99,23 @@ class Report(models.Model):
             log_lines = self.log.split("\n")
         return log_lines
 
-    def _get_notification_ctx(self) -> NotificationContext:
-        return NotificationContext(
-            task_name=self.task.name,
-            invocation_time=int(self.invocation_datetime.timestamp()),
-            n_warnings=self.n_log_warnings,
-            n_errors=self.n_log_errors,
-        )
-
     def emit_notifications(self):
         """Emit a slack or email notification."""
         if not self.invocation_result:
             return
 
-        handlers: Collection[NotificationHandler]
+        from taskmanager import notifications
+
+        handlers: Dict[str, notifications.NotificationHandler]
         handlers = self._meta.app_config.notification_handlers
 
-        level = invocation_result_to_level_map.get(self.invocation_result)
-        ctx = self._get_notification_ctx()
+        result = notifications.invocation_result_to_level_map.get(
+            self.invocation_result
+        )
 
-        for handler in handlers:
-            if level and level >= handler.level:
-                handler.emit(ctx)
+        for handler in handlers.values():
+            if result >= handler.level:
+                handler.emit(self)
 
 
 class TaskCategory(models.Model):
