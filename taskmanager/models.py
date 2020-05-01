@@ -78,12 +78,23 @@ class Report(models.Model):
     n_log_errors = models.PositiveIntegerField(null=True, blank=True)
     n_log_warnings = models.PositiveIntegerField(null=True, blank=True)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._cached_invocation_result = self.invocation_result
+
     def __str__(self):
         """Return the string representation of the app command."""
         return (
             f"Report {self.task.name} {self.invocation_result}"
             f" {self.invocation_datetime}"
         )
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self._cached_invocation_result != self.invocation_result:
+            # invocation_result has changed; emit notification
+            # TODO: make it async; use uwsgi spooler?
+            self.emit_notifications()
 
     # FIXME: iterate over the file instead of read all lines in memory
     def get_log_lines(self):
