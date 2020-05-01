@@ -1,7 +1,10 @@
 from abc import ABC
-from dataclasses import dataclass
 from typing import Dict, Union
 
+from django.urls import reverse
+
+from taskmanager.models import Report
+from taskmanager.utils import get_base_url, log_tail
 
 try:
     import slack
@@ -14,14 +17,6 @@ class Notifications:
     """
     A registry for notification handlers
     """
-
-
-@dataclass
-class NotificationContext:
-    task_name: str
-    invocation_time: int
-    n_warnings: int
-    n_errors: int
 
 
 LEVEL_OK = 0
@@ -41,10 +36,21 @@ invocation_result_to_level_map = {
 
 class NotificationHandler(ABC):
     messages: Dict[int, str] = {
-        LEVEL_OK: "",
-        LEVEL_WARNINGS: "",
-        LEVEL_ERRORS: "",
-        LEVEL_FAILED: "",
+        LEVEL_OK: (
+            'Task *"{task_name}"* invoked at {invocation_time} '
+            "completed successfully. "
+        ),
+        LEVEL_WARNINGS: (
+            'Task *"{task_name}"* invoked at {invocation_time} '
+            "completed successfully "
+            "with *{n_errors}* errors and *{n_warnings}* warnings."
+        ),
+        LEVEL_ERRORS: (
+            'Task *"{task_name}"* invoked at {invocation_time} '
+            "completed successfully "
+            "with *{n_errors}* errors and *{n_warnings}* warnings."
+        ),
+        LEVEL_FAILED: ('Task *"{task_name}"* invoked at {invocation_time} *failed*.'),
     }
     level: int
 
@@ -54,7 +60,7 @@ class NotificationHandler(ABC):
         elif isinstance(level, str):
             self.level = invocation_result_to_level_map.get(level, LEVEL_OK)
 
-    def emit(self, context: NotificationContext):
+    def emit(self, report: Report):
         raise NotImplementedError
 
 
@@ -74,76 +80,60 @@ class SlackNotificationHandler(NotificationHandler):
 
         super().__init__(level)
 
-    def emit(self, context: NotificationContext):
-        pass    # TODO: re-factor code below
-        # blocks = [
-        #     {
-        #         "type": "context",
-        #         "elements": [{"type": "mrkdwn", "text": f"django-uwsgi-taskmanager"}],
-        #     }
-        # ]
-        # if self.invocation_result == self.RESULT_FAILED:
-        #     blocks.append(
-        #         {
-        #             "type": "section",
-        #             "text": {
-        #                 "type": "mrkdwn",
-        #                 "text": UWSGI_TASKMANAGER_NOTIFICATIONS_FAILURE_MESSAGE.format(
-        #                     task_name=self.task.name,
-        #                     invocation_time=(
-        #                         "<!date"
-        #                         f"^{int(self.invocation_datetime.timestamp())}"
-        #                         "^{date_num} {time_secs}|???>"
-        #                     ),
-        #                 ),
-        #             },
-        #         }
-        #     )
-        # else:
-        #     blocks.append(
-        #         {
-        #             "type": "section",
-        #             "text": {
-        #                 "type": "mrkdwn",
-        #                 "text": UWSGI_TASKMANAGER_NOTIFICATIONS_WARNINGS_MESSAGE.format(
-        #                     task_name=self.task.name,
-        #                     invocation_time=(
-        #                         "<!date"
-        #                         f"^{int(self.invocation_datetime.timestamp())}"
-        #                         "^{date_num} {time_secs}|???>"
-        #                     ),
-        #                     n_errors=self.n_log_errors,
-        #                     n_warnings=self.n_log_warnings,
-        #                 ),
-        #             },
-        #         }
-        #     )
-        # blocks.append(
-        #     {
-        #         "type": "section",
-        #         "text": {
-        #             "type": "mrkdwn",
-        #             "text": f"Logs tail:\n ```{log_tail(self.log)}```",
-        #         },
-        #     }
-        # )
-        # base_url = get_base_url()
-        # if base_url:
-        #     logviewer_url = reverse("log_viewer", args=(self.id,))
-        #     blocks.append(
-        #         {
-        #             "type": "context",
-        #             "elements": [
-        #                 {
-        #                     "type": "mrkdwn",
-        #                     "text": f"<http://{base_url}{logviewer_url}|Full logs>",
-        #                 }
-        #             ],
-        #         }
-        #     )
-        # for channel in UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_CHANNELS:
-        #     slack_client.chat_postMessage(channel=channel, blocks=blocks)
-        #     # Fail silently
+    def emit(self, report: Report):
+        result = invocation_result_to_level_map.get(report.invocation_result)
+
+        text = self.messages.get(result)
+        text = text.format(
+            task_name=report.task.name,
+            invocation_time=int(report.invocation_datetime.timestamp()),
+            n_warnings=report.n_log_warnings,
+            n_errors=report.n_log_errors,
+        )
+
+        base_url = get_base_url()
+        logviewer_url = reverse("log_viewer", args=(report.id,))
+
+        blocks = [
+            {
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": "django-uwsgi-taskmanager",
+                    }
+                ],
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": text,
+                },
+            },
+            {
+                "type": "context",
+                "elements": [
+                    {
+                        "type": "mrkdwn",
+                        "text": f"<http://{base_url}{logviewer_url}|Full logs>",
+                    }
+                ],
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": (
+                        "Logs tail:\n"
+                        f"```{log_tail(report.log)}```"
+                    ),
+                },
+            },
+        ]
+
+        # Finally, post message to channel (fail silently)
+        self.client.chat_postMessage(channel=self.channel, blocks=blocks)
 
 
 #
