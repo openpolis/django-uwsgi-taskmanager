@@ -87,11 +87,11 @@ class Report(models.Model):
         super().save(*args, **kwargs)
         if self._cached_invocation_result != self.invocation_result:
             # invocation_result has changed; emit notification
-            # TODO: make it async; use uwsgi spooler?
-            self.emit_notifications()
+            self.emit_notifications()   # TODO: make it async; use uwsgi spooler?
+            self._cached_invocation_result = self.invocation_result
 
-    # FIXME: iterate over the file instead of read all lines in memory
     def get_log_lines(self):
+        # FIXME: iterate over the file instead of read all lines in memory
         """Return log lines from logfile or log field."""
         try:
             log_lines = "".join(open(self.logfile, "r").readlines()).split("\n")
