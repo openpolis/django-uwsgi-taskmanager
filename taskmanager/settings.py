@@ -1,6 +1,6 @@
 """Define settings for the taskmanager app."""
 
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 from django.conf import settings as django_project_settings
 
@@ -62,8 +62,8 @@ Example:
         "email-failures": {
             "class": "taskmanager.notifications.EmailNotificationHandler",
             "level": "failure",
-            "from": "<token>",
-            "recipient": "id-or-name-of-channel",
+            "from": "admin@example.com",
+            "recipients": ["admin@example.com",],
         },
     }
 
