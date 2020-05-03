@@ -345,21 +345,16 @@ class Task(models.Model):
             schedule = int(self.scheduling.timestamp())
             # NOTE: spool at param requires bytes
             kwargs["at"] = str(schedule).encode()
-        try:
-            task_id = exec_command_task.spool(self, **kwargs)
-        except Exception as e:
-            # TODO: better handle exception, might cause unexpected behaviours
-            Report.objects.create(
-                task=self,
-                invocation_result=Report.RESULT_FAILED,
-                log=f"TASK SPOOL FAILED!!!\n{e}",
-            )
+
+        # Spool the execution of the command
+        task_id = exec_command_task.spool(self, **kwargs)
+        if task_id:
+            self.spooler_id = task_id.decode("utf-8")
         else:
-            try:
-                self.spooler_id = task_id.decode("utf-8")
-            except AttributeError:
-                # NOTE: this occurs when no uWSGI is loaded (e.g. during tests)
-                pass
+            # This probably means the uWSGI spooler is unavailable and
+            # the task executed synchronously (e.g. during tests).
+            pass
+
         self.cached_next_ride = self.get_next_ride()
         self.keep_last_n_reports()
         self.save(update_fields=("spooler_id", "status", "cached_next_ride"))
