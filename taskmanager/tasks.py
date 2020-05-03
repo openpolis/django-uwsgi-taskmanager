@@ -3,6 +3,7 @@
 import datetime
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.core.management import call_command
@@ -14,9 +15,12 @@ from taskmanager.settings import (
 )
 from taskmanager.uwsgidecorators_wrapper import spool
 
+if TYPE_CHECKING:
+    from taskmanager.models import Task
+
 
 @spool(pass_arguments=True)
-def exec_command_task(curr_task):
+def exec_command_task(curr_task: "Task"):
     """Execute the command of a Task."""
     from taskmanager.models import Report, Task
 
