@@ -24,6 +24,9 @@ def get_base_url() -> Optional[str]:
             return Site.objects.get_current().domain
     except (LookupError, ImportError):
         pass
+
     # Fallback to UWSGI_TASKMANAGER_BASE_URL setting value; strip protocol bit
     if UWSGI_TASKMANAGER_BASE_URL:
         return UWSGI_TASKMANAGER_BASE_URL.strip("https://").strip("http://")
+
+    return None
