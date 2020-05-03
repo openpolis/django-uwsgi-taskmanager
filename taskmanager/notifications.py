@@ -1,6 +1,7 @@
 from abc import ABC
 from typing import TYPE_CHECKING, Dict, List, Union
 
+from django.core.mail import send_mail
 from django.urls import reverse
 
 from taskmanager.utils import get_base_url, log_tail
@@ -117,10 +118,7 @@ class SlackNotificationHandler(NotificationHandler):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": (
-                        "Logs tail:\n"
-                        f"```{log_tail(report.log)}```"
-                    ),
+                    "text": ("Logs tail:\n" f"```{log_tail(report.log)}```"),
                 },
             },
         ]
@@ -129,27 +127,43 @@ class SlackNotificationHandler(NotificationHandler):
         self.client.chat_postMessage(channel=self.channel, blocks=blocks)
 
 
-#
-# class EmailNotificationHandler(NotificationHandler):
-#     def __init__(self):
-#         pass
-#
-#     def emit(self):
-#         if self.invocation_result == self.RESULT_FAILED:
-#             subject = f"{self.task.name} failed"
-#             message = f"An error occurred: "
-#         else:
-#             subject = f"{self.task.name} completed with warning"
-#             message = (
-#                 f"{self.task.name}, "
-#                 f"invoked at {self.invocation_datetime}, "
-#                 f"completed with {self.n_log_warnings} warnings "
-#                 f"and {self.n_log_errors} errors."
-#             )
-#         send_mail(
-#             subject=subject,
-#             message=message,
-#             from_email=UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_FROM,
-#             recipient_list=UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_RECIPIENTS,
-#             fail_silently=True,
-#         )
+class EmailNotificationHandler(NotificationHandler):
+    subjects: Dict[int, str] = {
+        LEVEL_OK: 'Task *"{task_name}"* completed successfully.',
+        LEVEL_WARNINGS: 'Task *"{task_name}"* completed with warning.',
+        LEVEL_ERRORS: 'Task *"{task_name} with  errors.',
+        LEVEL_FAILED: 'Task *"{task_name}"* has failed.',
+    }
+
+    def __init__(
+        self,
+        from_email: str,
+        recipients: List[str],
+        level: Union[int, str] = LEVEL_DEFAULT,
+    ):
+
+        self.from_email = from_email
+
+        self.recipients = recipients
+
+        super().__init__(level)
+
+    def emit(self, report: "Report"):
+        result = invocation_result_to_level_map[report.invocation_result]
+
+        text = self.messages[result]
+
+        text = text.format(
+            task_name=report.task.name,
+            invocation_time=report.invocation_datetime.strftime("%x %X"),
+            n_warnings=report.n_log_warnings,
+            n_errors=report.n_log_errors,
+        )
+
+        send_mail(
+            subject=self.subjects[result],
+            message=text,
+            from_email=self.from_email,
+            recipient_list=self.recipients,
+            fail_silently=True,
+        )
