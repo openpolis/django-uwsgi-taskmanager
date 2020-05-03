@@ -9,6 +9,7 @@ from django.core.management import load_command_class
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
+from taskmanager import notifications
 from taskmanager.settings import UWSGI_TASKMANAGER_N_REPORTS_INLINE
 from taskmanager.tasks import exec_command_task
 
@@ -72,23 +73,12 @@ class Report(models.Model):
     n_log_errors = models.PositiveIntegerField(null=True, blank=True)
     n_log_warnings = models.PositiveIntegerField(null=True, blank=True)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._cached_invocation_result = self.invocation_result
-
     def __str__(self):
         """Return the string representation of the app command."""
         return (
             f"Report {self.task.name} {self.invocation_result}"
             f" {self.invocation_datetime}"
         )
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        if self._cached_invocation_result != self.invocation_result:
-            # invocation_result has changed; emit notification
-            self.emit_notifications()   # TODO: make it async; use uwsgi spooler?
-            self._cached_invocation_result = self.invocation_result
 
     def get_log_lines(self):
         # FIXME: iterate over the file instead of read all lines in memory
@@ -103,8 +93,6 @@ class Report(models.Model):
         """Emit a slack or email notification."""
         if not self.invocation_result:
             return
-
-        from taskmanager import notifications
 
         handlers: Dict[str, notifications.NotificationHandler]
         handlers = self._meta.app_config.notification_handlers
