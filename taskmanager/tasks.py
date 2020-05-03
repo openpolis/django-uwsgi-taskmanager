@@ -143,3 +143,6 @@ def exec_command_task(curr_task: "Task"):
             "cached_next_ride",
         )
     )
+
+    # Finally, emit notifications
+    report_obj.emit_notifications()
