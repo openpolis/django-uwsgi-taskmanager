@@ -231,11 +231,10 @@ class Task(models.Model):
         """Get the last invocation date and time."""
         return self.last_report.invocation_datetime if self.last_report else None
 
-    def get_next_ride(self):
+    def get_next_ride(self) -> datetime.datetime:
         """Get the next ride."""
         if self.repetition_period and self.status == self.STATUS_SPOOLED:
             if self.repetition_rate in (None, 0):
-                # FIXME: move this logic in class
                 # consider 1 as default repetition_rate
                 self.repetition_rate = 1
             if self.repetition_period == self.REPETITION_PERIOD_MINUTE:
@@ -245,8 +244,7 @@ class Task(models.Model):
             elif self.repetition_period == self.REPETITION_PERIOD_DAY:
                 offset = datetime.timedelta(days=self.repetition_rate)
             else:
-                # FIXME: move this logic in class
-                # consider MONTH as default repetition_period
+                # consider one month as default repetition_period
                 offset = datetime.timedelta(days=self.repetition_rate * 365.0 / 12.0)
             next_ride = self.last_invocation_datetime + offset
         elif self.scheduling and self.status == Task.STATUS_SCHEDULED:
