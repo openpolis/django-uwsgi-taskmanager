@@ -1,14 +1,16 @@
 from abc import ABC
-from typing import Dict, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
 from django.urls import reverse
 
-from taskmanager.models import Report
 from taskmanager.utils import get_base_url, log_tail
+
+if TYPE_CHECKING:
+    from taskmanager.models import Report
+
 
 try:
     import slack
-
 except ImportError:  # pragma: no cover
     slack = None
 
@@ -60,7 +62,7 @@ class NotificationHandler(ABC):
         elif isinstance(level, str):
             self.level = invocation_result_to_level_map.get(level, LEVEL_OK)
 
-    def emit(self, report: Report):
+    def emit(self, report: "Report"):
         raise NotImplementedError
 
 
@@ -80,13 +82,15 @@ class SlackNotificationHandler(NotificationHandler):
 
         super().__init__(level)
 
-    def emit(self, report: Report):
-        result = invocation_result_to_level_map.get(report.invocation_result)
+    def emit(self, report: "Report"):
 
-        text = self.messages.get(result)
+        result = invocation_result_to_level_map[report.invocation_result]
+
+        text = self.messages[result]
+
         text = text.format(
             task_name=report.task.name,
-            invocation_time=int(report.invocation_datetime.timestamp()),
+            invocation_time=report.invocation_datetime.strftime("%x %X"),
             n_warnings=report.n_log_warnings,
             n_errors=report.n_log_errors,
         )
@@ -97,20 +101,9 @@ class SlackNotificationHandler(NotificationHandler):
         blocks = [
             {
                 "type": "context",
-                "elements": [
-                    {
-                        "type": "mrkdwn",
-                        "text": "django-uwsgi-taskmanager",
-                    }
-                ],
+                "elements": [{"type": "mrkdwn", "text": "django-uwsgi-taskmanager",}],
             },
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": text,
-                },
-            },
+            {"type": "section", "text": {"type": "mrkdwn", "text": text,},},
             {
                 "type": "context",
                 "elements": [
