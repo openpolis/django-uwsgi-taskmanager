@@ -1,8 +1,8 @@
 """Define Django models for the taskmanager app."""
 import datetime
-from io import StringIO
 import os
 import re
+from io import StringIO
 from typing import Dict
 
 from django.core.management import load_command_class
@@ -123,7 +123,12 @@ class TaskCategory(models.Model):
 
 
 class Task(models.Model):
-    """A command related task."""
+    """
+    A command related task.
+
+    Represents a management command with a defined set of arguments (
+
+    """
 
     REPETITION_PERIOD_MINUTE = "minute"
     REPETITION_PERIOD_HOUR = "hour"
@@ -184,6 +189,7 @@ class Task(models.Model):
     note = models.TextField(
         blank=True, null=True, help_text=_("A note on how this task is used.")
     )
+
     cached_last_invocation_datetime = models.DateTimeField(
         blank=True, null=True, verbose_name=_("Last datetime")
     )
@@ -201,7 +207,7 @@ class Task(models.Model):
         null=True, blank=True, verbose_name=_("Warnings")
     )
     cached_next_ride = models.DateTimeField(
-        blank=True, null=True, verbose_name=_("Next")
+        blank=True, null=True, verbose_name=_("Next"),
     )
 
     @property
