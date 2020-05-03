@@ -48,6 +48,7 @@ setup(
             "flake8-isort",
             "flake8",
             "isort",
+            "mypy",
             "pre-commit",
         ],
         "docs": [
