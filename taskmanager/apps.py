@@ -23,7 +23,7 @@ class TaskmanagerConfig(AppConfig):
             if handler_class:
                 instance = handler_class(**handler)
                 if instance:
-                    self.notification_handlers["name"] = instance
+                    self.notification_handlers[name] = instance
 
     def ready(self):
         self._register_notification_handlers()
