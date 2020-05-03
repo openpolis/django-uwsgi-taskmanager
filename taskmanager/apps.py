@@ -1,9 +1,11 @@
 """Configure taskmanager app."""
 from pydoc import locate
+from typing import Dict
 
 from django.apps import AppConfig
 from django.utils.translation import ugettext_lazy as _
 
+from taskmanager.notifications import NotificationHandler
 from taskmanager.settings import UWSGI_TASKMANAGER_NOTIFICATION_HANDLERS
 
 
@@ -13,7 +15,7 @@ class TaskmanagerConfig(AppConfig):
     name = "taskmanager"
     verbose_name = _("Task manager")
 
-    notification_handlers = {}
+    notification_handlers: Dict[str, NotificationHandler] = {}
 
     def _register_notification_handlers(self):
         for name, handler in UWSGI_TASKMANAGER_NOTIFICATION_HANDLERS.items():
