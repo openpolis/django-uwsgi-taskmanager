@@ -1,5 +1,7 @@
-from abc import ABC
-from typing import TYPE_CHECKING, Dict, List, Union
+"""Implements a "pluggable" notifications system."""
+
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Any, Dict, List, Union
 
 from django.core.mail import send_mail
 from django.urls import reverse
@@ -14,13 +16,6 @@ try:
     import slack
 except ImportError:  # pragma: no cover
     slack = None
-
-
-class Notifications:
-    """
-    A registry for notification handlers
-    """
-
 
 LEVEL_OK = 0
 LEVEL_WARNINGS = 10
@@ -38,6 +33,14 @@ invocation_result_to_level_map = {
 
 
 class NotificationHandler(ABC):
+    """
+    Represents a notification handler.
+
+    A notification handler will "emit" a notification when triggered.
+
+    This class is abstract, and it's meant to be extended.
+    """
+
     messages: Dict[int, str] = {
         LEVEL_OK: (
             'Task *"{task_name}"* invoked at {invocation_time} '
@@ -55,20 +58,40 @@ class NotificationHandler(ABC):
         ),
         LEVEL_FAILED: ('Task *"{task_name}"* invoked at {invocation_time} *failed*.'),
     }
+
     level: int
 
     def __init__(self, level: Union[int, str] = LEVEL_DEFAULT):
+        """
+        Init instance attributes.
+
+        :param level: the handler will emit notifications equal or above this level.
+        """
         if isinstance(level, int):
             self.level = level
         elif isinstance(level, str):
             self.level = invocation_result_to_level_map.get(level, LEVEL_OK)
 
-    def emit(self, report: "Report"):
+    def handle(self, report: "Report") -> None:
+        """Conditionally emit notification. """
+        result = invocation_result_to_level_map.get(report.invocation_result)
+
+        if result and result >= self.level:
+            return self.emit(report)
+
+    @abstractmethod
+    def emit(self, report: "Report") -> None:
         raise NotImplementedError
 
 
 class SlackNotificationHandler(NotificationHandler):
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, **kwargs):  # type: ignore
+        """
+        Create a new instance.
+
+        This method will check if "slack" module is available,
+        and will return None if it isn't.
+        """
 
         if slack:  # Only create a new instance if "slack" module is available
             return super().__new__(cls)
@@ -76,6 +99,13 @@ class SlackNotificationHandler(NotificationHandler):
     def __init__(
         self, token: str, channel: str, level: Union[int, str] = LEVEL_DEFAULT,
     ):
+        """
+        Init instance attributes.
+
+        :param token: the Slack token.
+        :param channel: the Slack channel where this handler will emit notifications.
+        :param level: the handler will emit notifications equal or above this level.
+        """
 
         self.client = slack.WebClient(token=token)
 
@@ -83,7 +113,7 @@ class SlackNotificationHandler(NotificationHandler):
 
         super().__init__(level)
 
-    def emit(self, report: "Report"):
+    def emit(self, report: "Report") -> None:
 
         result = invocation_result_to_level_map[report.invocation_result]
 
@@ -141,6 +171,15 @@ class EmailNotificationHandler(NotificationHandler):
         recipients: List[str],
         level: Union[int, str] = LEVEL_DEFAULT,
     ):
+        """
+        Init instance attributes.
+
+        :param from_email: A string representing an email address.
+            This email address will be shown as the sender of the notification emails.
+        :param recipients:  A list of strings, each representing an email address.
+            Each email address will be notified by the handler.
+        :param level: the handler will emit notifications equal or above this level.
+        """
 
         self.from_email = from_email
 
@@ -148,7 +187,7 @@ class EmailNotificationHandler(NotificationHandler):
 
         super().__init__(level)
 
-    def emit(self, report: "Report"):
+    def emit(self, report: "Report") -> None:
         result = invocation_result_to_level_map[report.invocation_result]
 
         text = self.messages[result]
