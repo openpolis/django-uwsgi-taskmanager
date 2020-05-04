@@ -26,4 +26,5 @@ class TaskmanagerConfig(AppConfig):
                     self.notification_handlers[name] = instance
 
     def ready(self):
+        """Run stuff when Django starts."""
         self._register_notification_handlers()
