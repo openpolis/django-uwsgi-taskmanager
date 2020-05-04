@@ -41,9 +41,10 @@ def exec_command_task(curr_task: "Task"):
     n_tail_lines = UWSGI_TASKMANAGER_N_LINES_IN_REPORT_LOG
     log_tail_lines = []
     result = Report.RESULT_OK
-    report_logfile = open(report_logfile_path, "w")
 
-    report_obj = Report.objects.create(task=curr_task, logfile=report_logfile,)
+    report_obj = Report.objects.create(task=curr_task, logfile=report_logfile_path,)
+
+    report_logfile = open(report_logfile_path, "w")
 
     # Execute the command and capture its output
     try:
