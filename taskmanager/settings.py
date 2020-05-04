@@ -1,6 +1,6 @@
 """Define settings for the taskmanager app."""
 
-from typing import Dict, Optional
+from typing import Dict, Optional, Any
 
 from django.conf import settings as django_project_settings
 
@@ -32,7 +32,7 @@ UWSGI_TASKMANAGER_SAVE_LOGFILE: bool = getattr(
     django_project_settings, "UWSGI_TASKMANAGER_SAVE_LOGFILE", True
 )
 
-UWSGI_TASKMANAGER_NOTIFICATION_HANDLERS: Dict[str, Dict] = getattr(
+UWSGI_TASKMANAGER_NOTIFICATION_HANDLERS: Dict[str, Dict[str, Any]] = getattr(
     django_project_settings, "UWSGI_TASKMANAGER_NOTIFICATION_HANDLERS", {}
 )
 """
