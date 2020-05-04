@@ -97,13 +97,8 @@ class Report(models.Model):
         handlers: Dict[str, notifications.NotificationHandler]
         handlers = self._meta.app_config.notification_handlers
 
-        result = notifications.invocation_result_to_level_map.get(
-            self.invocation_result
-        )
-
         for handler in handlers.values():
-            if result >= handler.level:
-                handler.emit(self)
+            handler.handle(self)
 
 
 class TaskCategory(models.Model):
