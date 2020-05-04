@@ -1,3 +1,4 @@
+"""Base classes for writing management commands."""
 import logging
 import sys
 
