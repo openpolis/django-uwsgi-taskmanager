@@ -1,6 +1,6 @@
 """Configure taskmanager app."""
 from pydoc import locate
-from typing import Dict
+from typing import Dict, Type, Any
 
 from django.apps import AppConfig
 from django.utils.translation import ugettext_lazy as _
@@ -17,14 +17,14 @@ class TaskmanagerConfig(AppConfig):
 
     notification_handlers: Dict[str, NotificationHandler] = {}
 
-    def _register_notification_handlers(self):
+    def _register_notification_handlers(self) -> None:
         for name, handler in UWSGI_TASKMANAGER_NOTIFICATION_HANDLERS.items():
-            handler_class = locate(handler.pop("class"))
+            handler_class: Type[NotificationHandler] = locate(handler.pop("class"))
             if handler_class:
                 instance = handler_class(**handler)
                 if instance:
                     self.notification_handlers[name] = instance
 
-    def ready(self):
+    def ready(self) -> None:
         """Run stuff when Django starts."""
         self._register_notification_handlers()
