@@ -3,7 +3,6 @@
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin.actions import delete_selected
-from django.forms import BaseInlineFormSet
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -13,7 +12,6 @@ from pytz import timezone
 from taskmanager.models import AppCommand, Report, Task, TaskCategory
 from taskmanager.settings import (
     UWSGI_TASKMANAGER_N_LINES_IN_REPORT_INLINE,
-    UWSGI_TASKMANAGER_N_REPORTS_INLINE,
     UWSGI_TASKMANAGER_SHOW_LOGVIEWER_LINK,
     UWSGI_TASKMANAGER_USE_FILTER_COLLAPSE,
 )
