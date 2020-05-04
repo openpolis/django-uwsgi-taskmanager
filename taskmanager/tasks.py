@@ -43,6 +43,8 @@ def exec_command_task(curr_task: "Task"):
     result = Report.RESULT_OK
     report_logfile = open(report_logfile_path, "w")
 
+    report_obj = Report.objects.create(task=curr_task, logfile=report_logfile,)
+
     # Execute the command and capture its output
     try:
         report_logfile.write(
@@ -95,14 +97,19 @@ def exec_command_task(curr_task: "Task"):
         except FileNotFoundError:
             pass
 
-    report_obj = Report.objects.create(
-        task=curr_task,
-        logfile=report_logfile,
-        invocation_result=result,
-        log="\n".join(log_tail_lines[::-1]),
-        n_log_lines=n_log_lines,
-        n_log_errors=n_log_errors,
-        n_log_warnings=n_log_warnings,
+    report_obj.invocation_result = result
+    report_obj.log = "\n".join(log_tail_lines[::-1])
+    report_obj.n_log_lines = n_log_lines
+    report_obj.n_log_errors = n_log_errors
+    report_obj.n_log_warnings = n_log_warnings
+    report_obj.save(
+        update_fields=(
+            "invocation_result",
+            "log",
+            "n_log_lines",
+            "n_log_errors",
+            "n_log_warnings",
+        )
     )
 
     curr_task.cached_last_invocation_result = report_obj.invocation_result
