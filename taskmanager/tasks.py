@@ -108,13 +108,54 @@ def exec_command_task(curr_task):
             curr_task.repetition_rate = 1
         if curr_task.repetition_period == Task.REPETITION_PERIOD_MINUTE:
             offset = datetime.timedelta(minutes=curr_task.repetition_rate)
+            next = (
+                datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0) +
+                offset +
+                datetime.timedelta(seconds=curr_task.scheduling.second)
+            )
         elif curr_task.repetition_period == Task.REPETITION_PERIOD_HOUR:
             offset = datetime.timedelta(hours=curr_task.repetition_rate)
+            next = (
+                datetime.datetime(now.year, now.month, now.day, now.hour, 0, 0) +
+                offset +
+                datetime.timedelta(
+                    minutes=curr_task.scheduling.minute,
+                    seconds=curr_task.scheduling.second
+                )
+            )
         elif curr_task.repetition_period == Task.REPETITION_PERIOD_DAY:
             offset = datetime.timedelta(days=curr_task.repetition_rate)
+            next = (
+                datetime.datetime(now.year, now.month, now.day, 0, 0, 0) +
+                offset +
+                datetime.timedelta(
+                    hours=curr_task.scheduling.hour,
+                    minutes=curr_task.scheduling.minute,
+                    seconds=curr_task.scheduling.second
+                )
+            )
         else:  # consider MONTH as repetition_period
             offset = datetime.timedelta(days=curr_task.repetition_rate * 365.0 / 12.0)
-        next_ride = now + offset
+            next = (
+                datetime.datetime(
+                    now.year,
+                    (now.month + curr_task.repetition_period) % 12,
+                    0, 0, 0, 0
+                ) +
+                datetime.timedelta(
+                    hours=curr_task.scheduling.hour,
+                    minutes=curr_task.scheduling.minute,
+                    seconds=curr_task.scheduling.second
+                )
+            )
+
+        # scheduled task should start at scheduled time
+        # if the scheduled time has already passed, then execution is set in 10 seconds
+        if next <= now:
+            next_ride = now + datetime.timedelta(seconds=10)
+        else:
+            next_ride = next
+
         schedule = int(next_ride.timestamp())
         task_id = exec_command_task.spool(curr_task, at=str(schedule).encode())
         curr_task.spooler_id = task_id.decode("utf-8")
