@@ -122,20 +122,21 @@ def exec_command_task(curr_task: "Task"):
     # Re-schedule the Task if needed
     if curr_task.repetition_period:
         curr_task.status = Task.STATUS_SPOOLED
-        now = datetime.datetime.now(pytz.timezone('UTC'))
+        utc_tz = pytz.timezone('UTC')
+        now = datetime.datetime.now(utc_tz)
         if not curr_task.repetition_rate:
             curr_task.repetition_rate = 1
         if curr_task.repetition_period == Task.REPETITION_PERIOD_MINUTE:
             offset = datetime.timedelta(minutes=curr_task.repetition_rate)
             _next = (
-                datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0) +
+                datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0, tzinfo=utc_tz) +
                 offset +
                 datetime.timedelta(seconds=curr_task.scheduling.second)
             )
         elif curr_task.repetition_period == Task.REPETITION_PERIOD_HOUR:
             offset = datetime.timedelta(hours=curr_task.repetition_rate)
             _next = (
-                datetime.datetime(now.year, now.month, now.day, now.hour, 0, 0) +
+                datetime.datetime(now.year, now.month, now.day, now.hour, 0, 0, tzinfo=utc_tz) +
                 offset +
                 datetime.timedelta(
                     minutes=curr_task.scheduling.minute,
@@ -145,7 +146,7 @@ def exec_command_task(curr_task: "Task"):
         elif curr_task.repetition_period == Task.REPETITION_PERIOD_DAY:
             offset = datetime.timedelta(days=curr_task.repetition_rate)
             _next = (
-                datetime.datetime(now.year, now.month, now.day, 0, 0, 0) +
+                datetime.datetime(now.year, now.month, now.day, 0, 0, 0, tzinfo=utc_tz) +
                 offset +
                 datetime.timedelta(
                     hours=curr_task.scheduling.hour,
@@ -158,7 +159,8 @@ def exec_command_task(curr_task: "Task"):
                 datetime.datetime(
                     now.year,
                     (now.month + int(curr_task.repetition_period)) % 12,
-                    0, 0, 0, 0
+                    0, 0, 0, 0,
+                    tzinfo=utc_tz
                 ) +
                 datetime.timedelta(
                     hours=curr_task.scheduling.hour,
@@ -177,7 +179,7 @@ def exec_command_task(curr_task: "Task"):
         schedule = str(int(next_ride.timestamp())).encode()
         task_id = exec_command_task.spool(curr_task, at=schedule)
         curr_task.spooler_id = task_id.decode("utf-8")
-        curr_task.cached_next_ride = next_ride.replace(tzinfo=None)
+        curr_task.cached_next_ride = next_ride.replace(tzinfo=utc_tz)
     else:
         curr_task.status = Task.STATUS_IDLE
         if curr_task.spooler_id:

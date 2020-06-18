@@ -7,10 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unpublished]
 
+
+## [2.1.1] - 2020-06-18
+
+### Fixed
+
+- bug on naif vs non-naif dates comparison solved
+
+
+## [2.1.0] - 2020-06-18
+
 ### Changed
 
 - configuration for custom formset of reports in task admin change form improved; first login is now visible
 - javascript error corrected for dynamic tasks filter
+- settings for notifications refactored 
+- uwsgidecorators requirement removed 
+- types hints added
 
 ## [2.0.4] - 2020-01-21
 
