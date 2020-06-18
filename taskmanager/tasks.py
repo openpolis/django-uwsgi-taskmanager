@@ -2,6 +2,7 @@
 
 import datetime
 import os
+import pytz
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -121,7 +122,7 @@ def exec_command_task(curr_task: "Task"):
     # Re-schedule the Task if needed
     if curr_task.repetition_period:
         curr_task.status = Task.STATUS_SPOOLED
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(pytz.timezone('UTC'))
         if not curr_task.repetition_rate:
             curr_task.repetition_rate = 1
         if curr_task.repetition_period == Task.REPETITION_PERIOD_MINUTE:
@@ -176,7 +177,7 @@ def exec_command_task(curr_task: "Task"):
         schedule = str(int(next_ride.timestamp())).encode()
         task_id = exec_command_task.spool(curr_task, at=schedule)
         curr_task.spooler_id = task_id.decode("utf-8")
-        curr_task.cached_next_ride = next_ride
+        curr_task.cached_next_ride = next_ride.replace(tzinfo=None)
     else:
         curr_task.status = Task.STATUS_IDLE
         if curr_task.spooler_id:
