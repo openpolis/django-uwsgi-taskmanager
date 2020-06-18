@@ -3,28 +3,35 @@
 import datetime
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from django.conf import settings
 from django.core.management import call_command
 from file_read_backwards import FileReadBackwards
-from uwsgidecoratorsfallback import spool
 
 from taskmanager.settings import (
     UWSGI_TASKMANAGER_N_LINES_IN_REPORT_LOG,
     UWSGI_TASKMANAGER_SAVE_LOGFILE,
 )
+from taskmanager.uwsgidecorators_wrapper import spool
+
+if TYPE_CHECKING:
+    from taskmanager.models import Task
 
 
 @spool(pass_arguments=True)
-def exec_command_task(curr_task):
+def exec_command_task(curr_task: "Task"):
     """Execute the command of a Task."""
     from taskmanager.models import Report, Task
 
     curr_task.status = Task.STATUS_STARTED
     curr_task.save(update_fields=("status",))
-    now = f"{datetime.datetime.now():%Y%m%d%H%M%S%f}"
+
+    # Set-up execution
+    now = datetime.datetime.now()
     report_logfile_path = (
-        f"{settings.MEDIA_ROOT}/taskmanager/logs/task_{curr_task.id}/{now}.log"
+        f"{settings.MEDIA_ROOT}/taskmanager/logs/"
+        f"task_{curr_task.id}/{now:%Y%m%d%H%M%S%f}.log"
     )
     os.makedirs(os.path.dirname(report_logfile_path), exist_ok=True)
     Path(report_logfile_path).touch()
@@ -33,9 +40,13 @@ def exec_command_task(curr_task):
     n_log_lines = 0
     n_tail_lines = UWSGI_TASKMANAGER_N_LINES_IN_REPORT_LOG
     log_tail_lines = []
-    report = Report.objects.create(task=curr_task, logfile=report_logfile_path)
     result = Report.RESULT_OK
+
+    report_obj = Report.objects.create(task=curr_task, logfile=report_logfile_path,)
+
     report_logfile = open(report_logfile_path, "w")
+
+    # Execute the command and capture its output
     try:
         report_logfile.write(
             (
@@ -44,9 +55,11 @@ def exec_command_task(curr_task):
             )
         )
         report_logfile.flush()
+
         call_command(
             curr_task.command.name, *curr_task.complete_args, stdout=report_logfile
         )
+
         report_logfile.flush()
     except Exception as e:
         result = Report.RESULT_FAILED
@@ -60,6 +73,7 @@ def exec_command_task(curr_task):
             )
         )
         report_logfile.close()
+
     with FileReadBackwards(report_logfile_path, encoding="utf-8") as report_logfile:
         for line in report_logfile:
             if n_log_lines < n_tail_lines:
@@ -69,6 +83,7 @@ def exec_command_task(curr_task):
                 n_log_errors += 1
             elif "WARNING" in line:
                 n_log_warnings += 1
+
     hidden_lines = n_log_lines - n_tail_lines
     if hidden_lines > 0:
         log_tail_lines.append(f"{hidden_lines} lines hidden ...")
@@ -82,12 +97,13 @@ def exec_command_task(curr_task):
             os.unlink(report_logfile_path)
         except FileNotFoundError:
             pass
-    report.invocation_result = result
-    report.log = "\n".join(log_tail_lines[::-1])
-    report.n_log_lines = n_log_lines
-    report.n_log_errors = n_log_errors
-    report.n_log_warnings = n_log_warnings
-    report.save(
+
+    report_obj.invocation_result = result
+    report_obj.log = "\n".join(log_tail_lines[::-1])
+    report_obj.n_log_lines = n_log_lines
+    report_obj.n_log_errors = n_log_errors
+    report_obj.n_log_warnings = n_log_warnings
+    report_obj.save(
         update_fields=(
             "invocation_result",
             "log",
@@ -96,11 +112,13 @@ def exec_command_task(curr_task):
             "n_log_warnings",
         )
     )
-    report.emit_notification()
-    curr_task.cached_last_invocation_result = report.invocation_result
-    curr_task.cached_last_invocation_n_errors = report.n_log_errors
-    curr_task.cached_last_invocation_n_warnings = report.n_log_warnings
-    curr_task.cached_last_invocation_datetime = report.invocation_datetime
+
+    curr_task.cached_last_invocation_result = report_obj.invocation_result
+    curr_task.cached_last_invocation_n_errors = report_obj.n_log_errors
+    curr_task.cached_last_invocation_n_warnings = report_obj.n_log_warnings
+    curr_task.cached_last_invocation_datetime = report_obj.invocation_datetime
+
+    # Re-schedule the Task if needed
     if curr_task.repetition_period:
         curr_task.status = Task.STATUS_SPOOLED
         now = datetime.datetime.now()
@@ -108,14 +126,14 @@ def exec_command_task(curr_task):
             curr_task.repetition_rate = 1
         if curr_task.repetition_period == Task.REPETITION_PERIOD_MINUTE:
             offset = datetime.timedelta(minutes=curr_task.repetition_rate)
-            next = (
+            _next = (
                 datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0) +
                 offset +
                 datetime.timedelta(seconds=curr_task.scheduling.second)
             )
         elif curr_task.repetition_period == Task.REPETITION_PERIOD_HOUR:
             offset = datetime.timedelta(hours=curr_task.repetition_rate)
-            next = (
+            _next = (
                 datetime.datetime(now.year, now.month, now.day, now.hour, 0, 0) +
                 offset +
                 datetime.timedelta(
@@ -125,7 +143,7 @@ def exec_command_task(curr_task):
             )
         elif curr_task.repetition_period == Task.REPETITION_PERIOD_DAY:
             offset = datetime.timedelta(days=curr_task.repetition_rate)
-            next = (
+            _next = (
                 datetime.datetime(now.year, now.month, now.day, 0, 0, 0) +
                 offset +
                 datetime.timedelta(
@@ -135,11 +153,10 @@ def exec_command_task(curr_task):
                 )
             )
         else:  # consider MONTH as repetition_period
-            offset = datetime.timedelta(days=curr_task.repetition_rate * 365.0 / 12.0)
-            next = (
+            _next = (
                 datetime.datetime(
                     now.year,
-                    (now.month + curr_task.repetition_period) % 12,
+                    (now.month + int(curr_task.repetition_period)) % 12,
                     0, 0, 0, 0
                 ) +
                 datetime.timedelta(
@@ -151,13 +168,13 @@ def exec_command_task(curr_task):
 
         # scheduled task should start at scheduled time
         # if the scheduled time has already passed, then execution is set in 10 seconds
-        if next <= now:
+        if _next <= now:
             next_ride = now + datetime.timedelta(seconds=10)
         else:
-            next_ride = next
+            next_ride = _next
 
-        schedule = int(next_ride.timestamp())
-        task_id = exec_command_task.spool(curr_task, at=str(schedule).encode())
+        schedule = str(int(next_ride.timestamp())).encode()
+        task_id = exec_command_task.spool(curr_task, at=schedule)
         curr_task.spooler_id = task_id.decode("utf-8")
         curr_task.cached_next_ride = next_ride
     else:
@@ -185,3 +202,6 @@ def exec_command_task(curr_task):
             "cached_next_ride",
         )
     )
+
+    # Finally, emit notifications
+    report_obj.emit_notifications()

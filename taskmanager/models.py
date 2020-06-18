@@ -1,32 +1,17 @@
 """Define Django models for the taskmanager app."""
-
 import datetime
 import os
 import re
 from io import StringIO
+from typing import Dict
 
-from django.core.mail import send_mail
 from django.core.management import load_command_class
 from django.db import models
-from django.urls import reverse
 from django.utils.translation import ugettext_lazy as _
 
-from taskmanager.settings import (
-    UWSGI_TASKMANAGER_N_REPORTS_INLINE,
-    UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_FROM,
-    UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_RECIPIENTS,
-    UWSGI_TASKMANAGER_NOTIFICATIONS_FAILURE_MESSAGE,
-    UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_CHANNELS,
-    UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_TOKEN,
-    UWSGI_TASKMANAGER_NOTIFICATIONS_WARNINGS_MESSAGE,
-)
+from taskmanager import notifications
+from taskmanager.settings import UWSGI_TASKMANAGER_N_REPORTS_INLINE
 from taskmanager.tasks import exec_command_task
-from taskmanager.utils import get_base_url, log_tail
-
-try:
-    import slack  # noqa
-except ImportError:  # pragma: no cover
-    slack = None  # noqa
 
 
 class AppCommand(models.Model):
@@ -95,8 +80,8 @@ class Report(models.Model):
             f" {self.invocation_datetime}"
         )
 
-    # FIXME: iterate over the file instead of read all lines in memory
     def get_log_lines(self):
+        # FIXME: iterate over the file instead of read all lines in memory
         """Return log lines from logfile or log field."""
         try:
             log_lines = "".join(open(self.logfile, "r").readlines()).split("\n")
@@ -104,121 +89,16 @@ class Report(models.Model):
             log_lines = self.log.split("\n")
         return log_lines
 
-    def emit_notification(self):
+    def emit_notifications(self):
         """Emit a slack or email notification."""
-        if self.invocation_result != self.RESULT_OK:
-            slack_configured = all(
-                [
-                    slack,
-                    UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_TOKEN,
-                    UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_CHANNELS,
-                ]
-            )
-            email_configured = all(
-                [
-                    UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_FROM,
-                    UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_RECIPIENTS,
-                ]
-            )
-            if slack_configured:
-                slack_client = slack.WebClient(
-                    token=UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_TOKEN
-                )
-                blocks = [
-                    {
-                        "type": "context",
-                        "elements": [
-                            {"type": "mrkdwn", "text": f"django-uwsgi-taskmanager"}
-                        ],
-                    }
-                ]
-                if self.invocation_result == self.RESULT_FAILED:
-                    blocks.append(
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": UWSGI_TASKMANAGER_NOTIFICATIONS_FAILURE_MESSAGE.format(
-                                    task_name=self.task.name,
-                                    invocation_time=(
-                                        "<!date"
-                                        f"^{int(self.invocation_datetime.timestamp())}"
-                                        "^{date_num} {time_secs}|???>"
-                                    ),
-                                ),
-                            },
-                        }
-                    )
-                else:
-                    blocks.append(
-                        {
-                            "type": "section",
-                            "text": {
-                                "type": "mrkdwn",
-                                "text": UWSGI_TASKMANAGER_NOTIFICATIONS_WARNINGS_MESSAGE.format(
-                                    task_name=self.task.name,
-                                    invocation_time=(
-                                        "<!date"
-                                        f"^{int(self.invocation_datetime.timestamp())}"
-                                        "^{date_num} {time_secs}|???>"
-                                    ),
-                                    n_errors=self.n_log_errors,
-                                    n_warnings=self.n_log_warnings,
-                                ),
-                            },
-                        }
-                    )
-                blocks.append(
-                    {
-                        "type": "section",
-                        "text": {
-                            "type": "mrkdwn",
-                            "text": f"Logs tail:\n ```{log_tail(self.log)}```",
-                        },
-                    }
-                )
-                base_url = get_base_url()
-                if base_url:
-                    logviewer_url = reverse("log_viewer", args=(self.id,))
-                    blocks.append(
-                        {
-                            "type": "context",
-                            "elements": [
-                                {
-                                    "type": "mrkdwn",
-                                    "text": f"<http://{base_url}{logviewer_url}|Full logs>",
-                                }
-                            ],
-                        }
-                    )
-                for channel in UWSGI_TASKMANAGER_NOTIFICATIONS_SLACK_CHANNELS:
-                    slack_client.chat_postMessage(channel=channel, blocks=blocks)
-                    # Fail silently
-            if email_configured:
-                if self.invocation_result == self.RESULT_FAILED:
-                    subject = f"{self.task.name} failed"
-                    message = f"An error occurred: "
-                else:
-                    subject = f"{self.task.name} completed with warning"
-                    message = (
-                        f"{self.task.name}, "
-                        f"invoked at {self.invocation_datetime}, "
-                        f"completed with {self.n_log_warnings} warnings "
-                        f"and {self.n_log_errors} errors."
-                    )
-                send_mail(
-                    subject=subject,
-                    message=message,
-                    from_email=UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_FROM,
-                    recipient_list=UWSGI_TASKMANAGER_NOTIFICATIONS_EMAIL_RECIPIENTS,
-                    fail_silently=True,
-                )
+        if not self.invocation_result:
+            return
 
-    class Meta:
-        """Django model options."""
+        handlers: Dict[str, notifications.NotificationHandler]
+        handlers = self._meta.app_config.notification_handlers
 
-        verbose_name = _("Report")
-        verbose_name_plural = _("Reports")
+        for handler in handlers.values():
+            handler.handle(self)
 
 
 class TaskCategory(models.Model):
@@ -238,7 +118,12 @@ class TaskCategory(models.Model):
 
 
 class Task(models.Model):
-    """A command related task."""
+    """
+    A command related task.
+
+    Represents a management command with a defined set of arguments (
+
+    """
 
     REPETITION_PERIOD_MINUTE = "minute"
     REPETITION_PERIOD_HOUR = "hour"
@@ -299,6 +184,7 @@ class Task(models.Model):
     note = models.TextField(
         blank=True, null=True, help_text=_("A note on how this task is used.")
     )
+
     cached_last_invocation_datetime = models.DateTimeField(
         blank=True, null=True, verbose_name=_("Last datetime")
     )
@@ -316,7 +202,7 @@ class Task(models.Model):
         null=True, blank=True, verbose_name=_("Warnings")
     )
     cached_next_ride = models.DateTimeField(
-        blank=True, null=True, verbose_name=_("Next")
+        blank=True, null=True, verbose_name=_("Next"),
     )
 
     @property
@@ -334,11 +220,10 @@ class Task(models.Model):
         """Get the last invocation date and time."""
         return self.last_report.invocation_datetime if self.last_report else None
 
-    def get_next_ride(self):
+    def get_next_ride(self) -> datetime.datetime:
         """Get the next ride."""
         if self.repetition_period and self.status == self.STATUS_SPOOLED:
             if self.repetition_rate in (None, 0):
-                # FIXME: move this logic in class
                 # consider 1 as default repetition_rate
                 self.repetition_rate = 1
             if self.repetition_period == self.REPETITION_PERIOD_MINUTE:
@@ -348,8 +233,7 @@ class Task(models.Model):
             elif self.repetition_period == self.REPETITION_PERIOD_DAY:
                 offset = datetime.timedelta(days=self.repetition_rate)
             else:
-                # FIXME: move this logic in class
-                # consider MONTH as default repetition_period
+                # consider one month as default repetition_period
                 offset = datetime.timedelta(days=self.repetition_rate * 365.0 / 12.0)
             next_ride = self.last_invocation_datetime + offset
         elif self.scheduling and self.status == Task.STATUS_SCHEDULED:
@@ -448,21 +332,16 @@ class Task(models.Model):
             schedule = int(self.scheduling.timestamp())
             # NOTE: spool at param requires bytes
             kwargs["at"] = str(schedule).encode()
-        try:
-            task_id = exec_command_task.spool(self, **kwargs)
-        except Exception as e:
-            # TODO: better handle exception, might cause unexpected behaviours
-            Report.objects.create(
-                task=self,
-                invocation_result=Report.RESULT_FAILED,
-                log=f"TASK SPOOL FAILED!!!\n{e}",
-            )
+
+        # Spool the execution of the command
+        task_id = exec_command_task.spool(self, **kwargs)
+        if task_id:
+            self.spooler_id = task_id.decode("utf-8")
         else:
-            try:
-                self.spooler_id = task_id.decode("utf-8")
-            except AttributeError:
-                # NOTE: this occurs when no uWSGI is loaded (e.g. during tests)
-                pass
+            # This probably means the uWSGI spooler is unavailable and
+            # the task executed synchronously (e.g. during tests).
+            pass
+
         self.cached_next_ride = self.get_next_ride()
         self.keep_last_n_reports()
         self.save(update_fields=("spooler_id", "status", "cached_next_ride"))

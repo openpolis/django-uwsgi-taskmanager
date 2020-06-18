@@ -3,7 +3,6 @@
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin.actions import delete_selected
-from django.forms import BaseInlineFormSet
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.safestring import mark_safe
@@ -13,7 +12,6 @@ from pytz import timezone
 from taskmanager.models import AppCommand, Report, Task, TaskCategory
 from taskmanager.settings import (
     UWSGI_TASKMANAGER_N_LINES_IN_REPORT_INLINE,
-    UWSGI_TASKMANAGER_N_REPORTS_INLINE,
     UWSGI_TASKMANAGER_SHOW_LOGVIEWER_LINK,
     UWSGI_TASKMANAGER_USE_FILTER_COLLAPSE,
 )
@@ -101,7 +99,9 @@ class ReportInline(ReportMixin, admin.TabularInline):
     fields = ("invocation_result", "invocation_datetime", "log_tail")
     # formset = ReportInlineFormset
     # template = 'admin/edit_inline/tabular_reports.html'
-    ordering = ['-invocation_datetime', ]
+    ordering = [
+        "-invocation_datetime",
+    ]
     model = Report
     readonly_fields = (
         "invocation_result",
@@ -441,4 +441,7 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
         """Task Admin asset definitions."""
 
         if UWSGI_TASKMANAGER_USE_FILTER_COLLAPSE:
-            js = ["//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js", "/static/js/menu_filter_collapse.js"]
+            js = [
+                "//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js",
+                "/static/js/menu_filter_collapse.js",
+            ]
