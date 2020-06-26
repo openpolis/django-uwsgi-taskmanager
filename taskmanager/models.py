@@ -5,6 +5,9 @@ import re
 from io import StringIO
 from typing import Dict
 
+from pygtail import Pygtail
+
+import pytz
 from django.core.management import load_command_class
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -88,6 +91,17 @@ class Report(models.Model):
         except FileNotFoundError:
             log_lines = self.log.split("\n")
         return log_lines
+
+    def get_unread_log_lines(self):
+        """Uses pigtail to read all lines of log file not yed read.
+        Info about read lines are kept in <logfile.offset>.
+
+        :return: lines of log not yet read
+        """
+        if os.path.exists(self.logfile):
+            return [line.strip('\n') for line in Pygtail(self.logfile)]
+        else:
+            return []
 
     def emit_notifications(self):
         """Emit a slack or email notification."""
@@ -222,24 +236,69 @@ class Task(models.Model):
 
     def get_next_ride(self) -> datetime.datetime:
         """Get the next ride."""
+        utc_tz = pytz.timezone('UTC')
         if self.repetition_period and self.status == self.STATUS_SPOOLED:
+            now = self.last_invocation_datetime
+
             if self.repetition_rate in (None, 0):
                 # consider 1 as default repetition_rate
                 self.repetition_rate = 1
             if self.repetition_period == self.REPETITION_PERIOD_MINUTE:
                 offset = datetime.timedelta(minutes=self.repetition_rate)
+                _next = (
+                    datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0, tzinfo=utc_tz) +
+                    offset +
+                    datetime.timedelta(seconds=self.scheduling.second)
+                )
             elif self.repetition_period == self.REPETITION_PERIOD_HOUR:
                 offset = datetime.timedelta(hours=self.repetition_rate)
+                _next = (
+                    datetime.datetime(now.year, now.month, now.day, now.hour, 0, 0, tzinfo=utc_tz) +
+                    offset +
+                    datetime.timedelta(
+                        minutes=self.scheduling.minute,
+                        seconds=self.scheduling.second
+                    )
+                )
             elif self.repetition_period == self.REPETITION_PERIOD_DAY:
                 offset = datetime.timedelta(days=self.repetition_rate)
+                _next = (
+                    datetime.datetime(now.year, now.month, now.day, 0, 0, 0, tzinfo=utc_tz) +
+                    offset +
+                    datetime.timedelta(
+                        hours=self.scheduling.hour,
+                        minutes=self.scheduling.minute,
+                        seconds=self.scheduling.second
+                    )
+                )
             else:
-                # consider one month as default repetition_period
-                offset = datetime.timedelta(days=self.repetition_rate * 365.0 / 12.0)
-            next_ride = self.last_invocation_datetime + offset
+                _next = (
+                    datetime.datetime(
+                        now.year,
+                        (now.month + int(self.repetition_period)) % 12,
+                        0, 0, 0, 0,
+                        tzinfo=utc_tz
+                    ) +
+                    datetime.timedelta(
+                        hours=self.scheduling.hour,
+                        minutes=self.scheduling.minute,
+                        seconds=self.scheduling.second
+                    )
+                )
+
+            # scheduled task should start at scheduled time
+            # if the scheduled time has already passed, then execution is set in 10 seconds
+            if _next <= now:
+                next_ride = now + datetime.timedelta(seconds=10)
+            else:
+                next_ride = _next
         elif self.scheduling and self.status == Task.STATUS_SCHEDULED:
             next_ride = self.scheduling
         else:
             next_ride = None
+
+        if next_ride:
+            next_ride = next_ride.replace(tzinfo=utc_tz)
         return next_ride
 
     @property

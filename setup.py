@@ -37,6 +37,7 @@ setup(
         "django>=1.11",
         "uwsgi",
         "file-read-backwards>=2.0.0",
+        "pygtail==0.11.1"
     ],
     extras_require={
         "notifications": ["slackclient"],

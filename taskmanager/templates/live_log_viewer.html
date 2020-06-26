@@ -1,0 +1,190 @@
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Report {{ pk }} | {% trans "Log viewer" %}</title>
+    <script src="{% static "js/linkify.min.js" %}"></script>
+    <script src="https://unpkg.com/vue@2.6.11/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios@0.19.2/dist/axios.js"></script>
+    <style>
+        html, body{
+            height:100%;
+            margin: 0;
+            padding: 0.5em;
+        }
+        #app {
+            height: 90%;
+        }
+        .messages-display {
+            background-color: black;
+            padding: 1em;
+            color: white;
+            font-family: 'Courier New', serif;
+            height: 80%;
+            overflow-y: scroll;
+        }
+
+        @keyframes blinking-dot {
+          0% {
+            opacity: 1;
+          }
+
+          25% {
+            opacity: 0.4;
+          }
+
+          75% {
+            opacity: 0.4;
+          }
+
+          100% {
+            opacity: 1;
+          }
+        }
+
+        .loader-animation {
+             position:relative;
+             white-space:initial
+        }
+        .loader-animation .dot {
+             display:inline-block;
+             width:6px;
+             height:6px;
+             margin:auto auto 12px;
+             border-radius:50%;
+             animation:blinking-dot 1s linear infinite;
+             background:#fff
+        }
+        .loader-animation .dot:nth-child(2) {
+             animation-delay:0.33s
+        }
+        .loader-animation .dot:nth-child(3) {
+             animation-delay:0.66s
+        }
+        .pt-3 {
+             padding-top:1rem !important
+        }
+        .pl-3
+        {
+             padding-left:1rem !important
+        }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+        <div id="tools">
+            <strong>{% trans "Log levels" %}:</strong>
+              {% if log_all.n %}
+                {% if selected_log_level == 'all' %}
+                  {% trans "ALL" %}
+                {% else %}
+                  <a href="{{ view.request.path }}?log_level=all">{% trans "ALL" %}</a>
+                {% endif %}
+                <sup>({{ log_all.n }})</sup>
+              {% endif %} |
+              {% if log_warning.n %}
+                {% if selected_log_level == 'warning' %}
+                  {% trans "WARNING" %}
+                {% else %}
+                  <a href="{{ view.request.path }}?log_level=warning">{% trans "WARNING" %}</a>
+                {% endif %}
+                <sup>({{ log_warning.n }})</sup>
+              {% else %}
+                {% trans "WARNING" %} <sup>(0)</sup>
+              {% endif %} |
+              {% if log_error.n %}
+                {% if selected_log_level == 'error' %}
+                  {% trans "ERROR" %}
+                {% else %}
+                  <a href="{{ view.request.path }}?log_level=error">{% trans "ERROR" %}</a>
+                {% endif %}
+                <sup>({{ log_error.n }})</sup>
+              {% else %}
+                {% trans "ERROR" %} <sup>(0)</sup>
+              {% endif %}
+        </div>
+        <h2>Live log viewer <span v-if="status != 'unknown'">(task status is [[status]])</span></h2>
+
+        <div ref="messagesDisplay" class="messages-display">
+            <div v-for="msg in messages">
+{#                <a id="L[[row.id]]">[[row.id]]</a>#}
+                <span>[[msg]]</span>
+            </div>
+            <div v-if="status == 'started'" class="loader-animation pt-3 pl-3">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var app = new Vue({
+          el: '#app',
+          delimiters: ['[[', ']]'],
+          data: {
+            messages: [],
+            status: "unknown",
+            stop_counter: 0
+          },
+          methods: {
+            loadData: function () {
+                var v = this
+                axios
+                    .get("{% url 'ajax_unread_log_lines' pk %}")
+                    .then(response => {
+                        delta = response.data.new_log_lines
+                        v.status = response.data.task_status
+                        v.messages.push(...delta)
+                        if (v.status === "idle") {
+                            clearInterval(interval_id)
+                        }
+                    })
+                    .catch(e => {
+                        console.log(e)
+                    })
+            }
+          },
+          mounted: function () {
+            this.loadData()
+            interval_id = setInterval(this.loadData, 3000)
+
+          },
+          updated: function() {
+            var display = this.$refs.messagesDisplay
+            display.scrollTop = display.scrollHeight + 1000
+          }
+        })
+
+    </script>
+
+{#    <script type="text/javascript">#}
+{#        /**#}
+{#         * This code uses linkify.js to extract links in pre's content#}
+{#         * and convert all recognized urls into html links.#}
+{#         **/#}
+{#        var preText;#}
+{#        var urls;#}
+{##}
+{#        preText = document.getElementById('loglines').innerText;#}
+{#        urls = linkify.find(preText, 'url');#}
+{##}
+{#        unique_urls = [];#}
+{#        for (var i=0; i<urls.length; i++) {#}
+{#            url = urls[i];#}
+{#            if (unique_urls.indexOf(url['value']) === -1) {#}
+{#                preText = preText.replace(#}
+{#                    new RegExp(url['value'], "g"), function (matched) {#}
+{#                        return '<a href="' + matched + '" target="_blank">' + matched + '</a>';#}
+{#                    }#}
+{#                );#}
+{#                unique_urls.push(url['value']);#}
+{#            }#}
+{#        }#}
+{#        document.getElementById('app').innerHTML = preText;#}
+{#    </script>#}
+
+  </body>
+</html>

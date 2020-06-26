@@ -64,6 +64,7 @@ class LoggingBaseCommand(BaseCommand):
             self.logger.setLevel(logging.DEBUG)
         # only add StreamHandler to non stdout/stderr streams
         # to avoid repetitions in log messages sent to console
+
         stdout_name = getattr(self.stdout, "name", None)
         if stdout_name is None or stdout_name != "<stdout>":
             # create a StreamHandler pointed to self.stdout, to be added to self.logger
