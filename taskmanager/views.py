@@ -84,7 +84,7 @@ class AjaxUnreadLogLines(LogViewerView):
         else:
             log_lines = report.get_unread_log_lines()
             # remove offset file if found and task is idle (cleanup)
-            if task_status == os.path.exists(f"{report.logfile}.offset"):
+            if task_status == "idle" and os.path.exists(f"{report.logfile}.offset"):
                 os.unlink(f"{report.logfile}.offset")
 
         return JsonResponse({
