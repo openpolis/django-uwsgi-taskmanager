@@ -5,8 +5,6 @@ import re
 from io import StringIO
 from typing import Dict
 
-from pygtail import Pygtail
-
 import pytz
 from django.core.management import load_command_class
 from django.db import models
@@ -92,14 +90,14 @@ class Report(models.Model):
             log_lines = self.log.split("\n")
         return log_lines
 
-    def get_unread_log_lines(self):
+    def read_log_lines(self, offset):
         """Uses pigtail to read all lines of log file not yed read.
         Info about read lines are kept in <logfile.offset>.
 
         :return: lines of log not yet read
         """
         if os.path.exists(self.logfile):
-            return [line.strip('\n') for line in Pygtail(self.logfile)]
+            return [line.strip('\n') for line in open(self.logfile, "r")][offset:]
         else:
             return []
 

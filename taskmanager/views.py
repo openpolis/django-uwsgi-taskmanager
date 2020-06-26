@@ -1,5 +1,4 @@
 """Define Django views for the taskmanager app."""
-import os
 from django.http import JsonResponse
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import TemplateView
@@ -60,34 +59,28 @@ class LiveLogViewerView(TemplateView):
 
         try:
             report = Report.objects.get(pk=pk)
-
-            # remove offset file if found
-            if os.path.exists(f"{report.logfile}.offset"):
-                os.unlink(f"{report.logfile}.offset")
         except Report.DoesNotExist:
             pass
 
         return context
 
 
-class AjaxUnreadLogLines(LogViewerView):
-    """The unread log lines, and counters, as JsonResponse"""
+class AjaxReadLogLines(LogViewerView):
+    """Read log lines starting from an offset, as JsonResponse"""
 
     def render_to_response(self, context, **response_kwargs):
         pk = context.get("pk", None)
+        offset = int(self.request.GET.get('offset', 0))
         try:
             report = Report.objects.get(pk=pk)
             task_status = report.task.status
         except Report.DoesNotExist:
-            log_lines = [_("No log for the report {pk}.").format(pk=pk),]
+            log_lines = [_("No log for the report {pk}.").format(pk=pk), ]
             task_status = None
         else:
-            log_lines = report.get_unread_log_lines()
-            # remove offset file if found and task is idle (cleanup)
-            if task_status == "idle" and os.path.exists(f"{report.logfile}.offset"):
-                os.unlink(f"{report.logfile}.offset")
+            log_lines = report.read_log_lines(offset)
 
         return JsonResponse({
-            'new_log_lines' : log_lines,
+            'new_log_lines': log_lines,
             'task_status': task_status
         })

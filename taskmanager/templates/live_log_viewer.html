@@ -126,18 +126,19 @@
           delimiters: ['[[', ']]'],
           data: {
             messages: [],
+            offset: 0,
             status: "unknown",
-            stop_counter: 0
           },
           methods: {
             loadData: function () {
                 var v = this
                 axios
-                    .get("{% url 'ajax_unread_log_lines' pk %}")
+                    .get("{% url 'ajax_read_log_lines' pk %}?offset=" + v.offset)
                     .then(response => {
                         delta = response.data.new_log_lines
                         v.status = response.data.task_status
                         v.messages.push(...delta)
+                        v.offset += delta.length
                         if (v.status === "idle") {
                             clearInterval(interval_id)
                         }
