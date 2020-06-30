@@ -2,7 +2,6 @@
 
 import datetime
 import os
-import pytz
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -45,7 +44,8 @@ def exec_command_task(curr_task: "Task"):
 
     report_obj = Report.objects.create(task=curr_task, logfile=report_logfile_path,)
 
-    report_logfile = open(report_logfile_path, "w")
+    # open logfile for writing, with line buffering turned on (1)
+    report_logfile = open(report_logfile_path, "w", buffering=1)
 
     # Execute the command and capture its output
     try:
@@ -120,66 +120,19 @@ def exec_command_task(curr_task: "Task"):
     curr_task.cached_last_invocation_datetime = report_obj.invocation_datetime
 
     # Re-schedule the Task if needed
-    if curr_task.repetition_period:
-        curr_task.status = Task.STATUS_SPOOLED
-        utc_tz = pytz.timezone('UTC')
-        now = datetime.datetime.now(utc_tz)
-        if not curr_task.repetition_rate:
-            curr_task.repetition_rate = 1
-        if curr_task.repetition_period == Task.REPETITION_PERIOD_MINUTE:
-            offset = datetime.timedelta(minutes=curr_task.repetition_rate)
-            _next = (
-                datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0, tzinfo=utc_tz) +
-                offset +
-                datetime.timedelta(seconds=curr_task.scheduling.second)
-            )
-        elif curr_task.repetition_period == Task.REPETITION_PERIOD_HOUR:
-            offset = datetime.timedelta(hours=curr_task.repetition_rate)
-            _next = (
-                datetime.datetime(now.year, now.month, now.day, now.hour, 0, 0, tzinfo=utc_tz) +
-                offset +
-                datetime.timedelta(
-                    minutes=curr_task.scheduling.minute,
-                    seconds=curr_task.scheduling.second
-                )
-            )
-        elif curr_task.repetition_period == Task.REPETITION_PERIOD_DAY:
-            offset = datetime.timedelta(days=curr_task.repetition_rate)
-            _next = (
-                datetime.datetime(now.year, now.month, now.day, 0, 0, 0, tzinfo=utc_tz) +
-                offset +
-                datetime.timedelta(
-                    hours=curr_task.scheduling.hour,
-                    minutes=curr_task.scheduling.minute,
-                    seconds=curr_task.scheduling.second
-                )
-            )
-        else:  # consider MONTH as repetition_period
-            _next = (
-                datetime.datetime(
-                    now.year,
-                    (now.month + int(curr_task.repetition_period)) % 12,
-                    0, 0, 0, 0,
-                    tzinfo=utc_tz
-                ) +
-                datetime.timedelta(
-                    hours=curr_task.scheduling.hour,
-                    minutes=curr_task.scheduling.minute,
-                    seconds=curr_task.scheduling.second
-                )
-            )
+    if curr_task.repetition_period and curr_task.get_next_ride():
 
-        # scheduled task should start at scheduled time
-        # if the scheduled time has already passed, then execution is set in 10 seconds
-        if _next <= now:
-            next_ride = now + datetime.timedelta(seconds=10)
-        else:
-            next_ride = _next
+        # compute next_ride
+        next_ride = curr_task.get_next_ride()
 
+        # re-write file in the spooler, with correct schedule
         schedule = str(int(next_ride.timestamp())).encode()
         task_id = exec_command_task.spool(curr_task, at=schedule)
+
+        # set status, spooler_id and cached_next_ride
+        curr_task.status = Task.STATUS_SPOOLED
         curr_task.spooler_id = task_id.decode("utf-8")
-        curr_task.cached_next_ride = next_ride.replace(tzinfo=utc_tz)
+        curr_task.cached_next_ride = next_ride
     else:
         curr_task.status = Task.STATUS_IDLE
         if curr_task.spooler_id:

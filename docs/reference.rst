@@ -18,10 +18,10 @@ taskmanager.models
       Task
       TaskCategory
 
-taskmanager.logging_utils
--------------------------
+taskmanager.management.base
+---------------------------
 
-.. automodule:: taskmanager.logging_utils
+.. automodule:: taskmanager.management.base
 
    .. rubric:: Classes
 
@@ -30,6 +30,16 @@ taskmanager.logging_utils
       LoggingBaseCommand
       NoTerminatorStreamHandler
 
+taskmanager.logging
+-------------------
+
+.. automodule:: taskmanager.logging
+
+   .. rubric:: Classes
+
+   .. autosummary::
+
+      NoTerminatorStreamHandler
 
 taskmanager.tasks
 -----------------

@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [unpublished]
 
 
+## [2.2.0] - 2020-06-29
+
+### Added
+
+- the report visualizer works as live logging viewer, 
+  showing logging messages while they're being produced
+- filtering on message levels
+- filtering messages containing a string
+- link to raw log messages page
+- sticky mode (follow log messages) can be disabled and re-enabled through a button
+- task information shown on the right column
+- report messages are ready to be localised
+
+### Fixed
+
+- the log messages are flushed immediately to the file system, 
+  even when their dimension is small
+  
 ## [2.1.1] - 2020-06-18
 
 ### Fixed
@@ -21,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - configuration for custom formset of reports in task admin change form improved; first login is now visible
 - javascript error corrected for dynamic tasks filter
+- notifications refactores as pluggable hadler
 - settings for notifications refactored 
 - uwsgidecorators requirement removed 
 - types hints added

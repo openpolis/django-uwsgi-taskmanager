@@ -14,15 +14,21 @@ launch or schedule management tasks, without having to consult the *developers* 
 
 The **features** include:
 
-- Start and stop tasks via the django admin interface
+- start and stop tasks via the django admin interface
 - schedule tasks for future executions
 - program periodic tasks launch
-- check, filter and download the generated reports/logs
+- check, filter and download the generated log messages, watching how created live
 - simply write a standard Django `Command` class (your app doesn't need to interact with Django uWSGI Taskmanager)
-- get notifications via Slack or email whenever a task fails
+- get notifications via Slack, email or build a custom notification class
 
 .. _uWSGI spooler: https://uwsgi-docs.readthedocs.io/en/latest/Spooler.html?highlight=spooler
 
+
+
+.. image:: _static/images/dtm-show-2.gif
+  :width: 800
+  :alt: Animateg GIF
+An animated GIF of how it all works. Click to enlarge.
 
 .. toctree::
    :maxdepth: 2

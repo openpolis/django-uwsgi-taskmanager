@@ -1,7 +1,7 @@
 """Implements a "pluggable" notifications system."""
 
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, Dict, List, Union
+from typing import TYPE_CHECKING, Dict, List, Union
 
 from django.core.mail import send_mail
 from django.urls import reverse
@@ -132,9 +132,9 @@ class SlackNotificationHandler(NotificationHandler):
         blocks = [
             {
                 "type": "context",
-                "elements": [{"type": "mrkdwn", "text": "django-uwsgi-taskmanager",}],
+                "elements": [{"type": "mrkdwn", "text": "django-uwsgi-taskmanager", }],
             },
-            {"type": "section", "text": {"type": "mrkdwn", "text": text,},},
+            {"type": "section", "text": {"type": "mrkdwn", "text": text, }, },
             {
                 "type": "context",
                 "elements": [

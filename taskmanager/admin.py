@@ -49,11 +49,11 @@ class ReportMixin(object):
         lines = "<pre>"
         lines += log_tail(obj.log, n_max_lines)
         if getattr(settings, "UWSGI_TASKMANAGER_SHOW_LOGVIEWER_LINK", False):
-            last_report_url = reverse("log_viewer", args=(obj.pk,))
+            last_report_url = reverse("live_log_viewer", args=(obj.pk,))
             lines += ugettext_lazy(
                 (
-                    "\n\nShow the <a href='{0}' target='_blank'>"
-                    "complete log with filters</a>"
+                    "\n\n<a href='{0}' target='_blank'>"
+                    "Show the log messages</a>"
                 )
             ).format(last_report_url)
         lines += "</pre>"

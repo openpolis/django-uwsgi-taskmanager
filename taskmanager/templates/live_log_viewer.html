@@ -1,0 +1,359 @@
+{% load i18n %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Report {{ pk }} | {% trans "Log viewer" %}</title>
+    <script src="{% static "js/linkify.min.js" %}"></script>
+    <script src="{% static "js/vue.js" %}"></script>
+    <script src="{% static "js/axios.js" %}"></script>
+    <style>
+        html, body{
+            height:100%;
+            margin: 0;
+            padding: 0.5em;
+        }
+        #app {
+            height: 90%;
+            font-family: Helvetica Neue, sans-serif;
+        }
+        #messages-display {
+            background-color: black;
+            padding: 1em;
+            color: white;
+            font-family: 'Courier New', serif;
+            height: 90%;
+            overflow-y: scroll;
+            border-top: 5px solid black;
+            border-bottom: 5px solid black;
+        }
+        #tools {
+            border: 1px solid lightgray;
+            padding: 3px;
+            background-color: #f3f3f3;
+        }
+        #tools button {
+            font-size: medium;
+        }
+        #tools button.active {
+            background-color: darkgray;
+        }
+
+        #app .message-row a {
+            color: darkolivegreen;
+        }
+
+        #content {
+            float: left;
+            width: 70%;
+            height: 100%;
+        }
+
+        #meta-info {
+            float: left;
+            width: 29%;
+            padding-left: 5px;
+            margin: 0;
+        }
+
+        /* Clear floats after the columns */
+        #app:after {
+          content: "";
+          display: table;
+          clear: both;
+        }
+
+
+        ul#meta-info li {
+            list-style: none;
+        }
+        ul#meta-info > li pre{
+            display: inline;
+            font-size: x-large;
+        }
+
+        #tools .column {
+            float: left;
+            width: 50%;
+        }
+
+        /* Clear floats after the columns */
+        #tools:after {
+          content: "";
+          display: table;
+          clear: both;
+        }
+
+        #search {
+            width: 30%!important;
+            text-align: center;
+        }
+        #search input {
+            width: 75%;
+        }
+
+        #other-tools {
+            text-align: right;
+            width: 20%!important;
+        }
+
+        @keyframes blinking-dot {
+          0% {
+            opacity: 1;
+          }
+
+          25% {
+            opacity: 0.4;
+          }
+
+          75% {
+            opacity: 0.4;
+          }
+
+          100% {
+            opacity: 1;
+          }
+        }
+
+        .loader-animation {
+             position:relative;
+             white-space:initial
+        }
+        .loader-animation .dot {
+             display:inline-block;
+             width:6px;
+             height:6px;
+             margin:auto auto 12px;
+             border-radius:50%;
+             animation:blinking-dot 1s linear infinite;
+             background:#fff
+        }
+        .loader-animation .dot:nth-child(2) {
+             animation-delay:0.33s
+        }
+        .loader-animation .dot:nth-child(3) {
+             animation-delay:0.66s
+        }
+        .pt-3 {
+             padding-top:1rem !important
+        }
+        .pl-3
+        {
+             padding-left:1rem !important
+        }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+        <h2>{{ task.name }}</h2>
+
+        <div id="content" class="column">
+            <div id="tools">
+                <div id="levels-buttons" class="column">
+                    <button
+                        v-on:click="resetFilter"
+                        v-bind:class="{active: grep == ''}"
+                        title="{% trans "Show all messages" %}"
+                    >ALL<span> ([[nMessages]]) </span></button>
+                    <button
+                        v-on:click="debugLevel"
+                        v-bind:class="{active: grep == 'DEBUG'}"
+                        v-if="nDebugMessages > 0"
+                        title="{% trans "Show only debug messages" %}"
+                    >DEBUG <span>([[nDebugMessages]])</span></button>
+                    <button
+                        v-on:click="infoLevel"
+                        v-bind:class="{active: grep == 'INFO'}"
+                        v-if="nInfoMessages > 0"
+                        title="{% trans "Show only info messages" %}"
+                    >INFO <span>([[nInfoMessages]])</span></button>
+                    <button
+                        v-on:click="warningLevel"
+                        v-bind:class="{active: grep == 'WARNING'}"
+                        v-if="nWarningMessages > 0"
+                        title="{% trans "Show only warnings" %}"
+                    >WARNINGS <span>([[nWarningMessages]])</span></button>
+                    <button
+                        v-on:click="errorLevel"
+                        v-bind:class="{active: grep == 'ERROR'}"
+                        v-if="nErrorMessages > 0"
+                        title="{% trans "Show only errors" %}"
+                    >ERRORS <span>([[nErrorMessages]])</span></button>
+                </div>
+
+                <div id="search" class="column">
+                    <input
+                        v-model="grep" id="grep" name="grep"
+                        type="text" title="{% trans "Search text in messages" %}"
+                        /><button
+                            v-on:click="resetFilter"
+                            v-if="grep !== ''"
+                            title="{% trans "Reset filters" %}"
+                            >x</button>
+                </div>
+
+                <div id="other-tools" class="column">
+                    <a href="{% url 'log_viewer' pk %}" target="_blank"><button name="raw"
+                    ><img
+                        src="{% static 'img/icons8-new-document-32.png' %}"
+                        width="16" alt="document-icon"
+                        title="{% trans "Raw log messages" %}"
+                        ></button></a>
+                    <button name="sticky"
+                        v-on:click="stickyFlip"
+                        v-bind:class="{active: sticky}"
+                    ><img
+                        src="{% static 'img/icons8-double-down-32.png' %}"
+                        width="16" alt="double-down-arrow-icon"
+                        title="{% trans "Click to flip stickiness (follows log messages)" %}"
+                        ></button>
+                </div>
+            </div>
+
+            <div id="messages-display" ref="messagesDisplay">
+                <div v-for="(msg, index) in filteredMessages" class="message-row">
+                    <a v-bind:id="'#L'+(index + 1)">[[index + 1]]</a>
+                    <span>[[msg]]</span>
+                </div>
+                <div v-if="status == 'started'" class="loader-animation pt-3 pl-3">
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                    <div class="dot"></div>
+                </div>
+            </div>
+        </div>
+        <ul id="meta-info" class="column">
+            <li>{% trans "Command" %}: <pre>{{ task.command.name }}</pre></li>
+            <li>{% trans "Arguments" %}:
+                <ul>
+                    {% for argument in task_arguments %}
+                        <li><pre>{{ argument }}</pre></li>
+                    {% endfor %}
+                </ul>
+            <li>{% trans "Launched at" %}: <pre>{{ report.invocation_datetime|date:'Y-m-d H:i:s' }}</pre></li>
+            <li>{% trans "Current status" %}: <pre v-if="status != 'unknown'">[[ status ]]</pre></li>
+        </ul>
+    </div>
+
+    <script type="text/javascript">
+        var app = new Vue({
+          el: '#app',
+          delimiters: ['[[', ']]'],
+          data: {
+            messages: [],
+            grep: '',
+            offset: 0,
+            status: "unknown",
+            next_ride: null,
+            sticky: true
+          },
+          methods: {
+            loadData: function () {
+                var v = this
+                axios
+                    .get("{% url 'ajax_read_log_lines' pk %}?offset=" + v.offset)
+                    .then(response => {
+                        var delta = response.data.new_log_lines
+
+                        /* add link to URLs in rows contained in delta */
+                        var linked_delta = delta.map(function (currentRow) {
+                            var preText;
+                            var urls;
+
+                            urls = linkify.find(currentRow, 'url');
+
+                            unique_urls = [];
+                            for (var i=0; i<urls.length; i++) {
+                                url = urls[i];
+                                if (unique_urls.indexOf(url['value']) === -1) {
+                                    currentRow = currentRow.replace(
+                                        new RegExp(url['value'], "g"), function (matched) {
+                                            return '<a href="' + matched + '" target="_blank">' + matched + '</a>';
+                                        }
+                                    );
+                                    unique_urls.push(url['value']);
+                                }
+                            }
+                            return currentRow
+                        });
+                        v.status = response.data.task_status
+                        v.messages.push(...linked_delta)
+                        v.offset = response.data.log_size
+                        if (v.status === "idle") {
+                            clearInterval(interval_id)
+                        }
+                    })
+                    .catch(e => {
+                        console.log(e)
+                    })
+            },
+            resetFilter: function() {
+                this.grep = ''
+            },
+            debugLevel: function() {
+                this.grep = 'DEBUG'
+            },
+            infoLevel: function() {
+                this.grep = 'INFO'
+            },
+            warningLevel: function() {
+                this.grep = 'WARNING'
+            },
+            errorLevel: function() {
+                this.grep = 'ERROR'
+            },
+            stickyFlip: function() {
+                this.sticky = !this.sticky
+            }
+          },
+          computed: {
+              filteredMessages: function () {
+                var _grep = this.grep
+                if (_grep !== '') {
+                    var _m = []
+                    for (let term of _grep.split('|')) {
+                      _m.push(...this.messages.filter(w => w.indexOf(term) > -1))
+                    }
+                    return _m
+                } else {
+                    return this.messages
+                }
+              },
+              nMessages: function() {
+                  return this.messages.length
+              },
+              nDebugMessages: function() {
+                  return this.messages.filter(w => w.indexOf('DEBUG') > -1).length
+              },
+              nInfoMessages: function() {
+                  return this.messages.filter(w => w.indexOf('INFO') > -1).length
+              },
+              nWarningMessages: function() {
+                  return this.messages.filter(w => w.indexOf('WARNING') > -1).length
+              },
+              nErrorMessages: function() {
+                  return this.messages.filter(w => w.indexOf('ERROR') > -1).length
+              }
+          },
+          mounted: function () {
+            this.loadData()
+            interval_id = setInterval(this.loadData, 3000)
+            this.$nextTick(function () {
+                var display = this.$refs.messagesDisplay
+                if (display !== undefined)
+                    display.scrollTop = display.scrollHeight + 1000
+            })
+
+          },
+          updated: function() {
+            var display = this.$refs.messagesDisplay
+            if (display !== undefined && this.sticky)
+                display.scrollTop = display.scrollHeight + 1000
+          }
+        })
+
+    </script>
+
+  </body>
+</html>
