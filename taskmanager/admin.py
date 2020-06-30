@@ -142,7 +142,7 @@ class TaskInline(admin.TabularInline):
             from django.utils.html import format_html
 
             if obj.last_report:
-                last_report_url = reverse("log_viewer", args=(obj.last_report.id,))
+                last_report_url = reverse("live_log_viewer", args=(obj.last_report.id,))
                 s = format_html(f'<a href="{last_report_url}" target="_blank">{s}</a>')
         status_str += s + "/"
         if obj.cached_next_ride:
@@ -412,7 +412,7 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
             from django.utils.html import format_html
 
             if obj.last_report:
-                last_report_url = reverse("log_viewer", args=(obj.last_report.id,))
+                last_report_url = reverse("live_log_viewer", args=(obj.last_report.id,))
                 s = format_html(f'<a href="{last_report_url}" target="_blank">{s}</a>')
         return s
 
