@@ -38,12 +38,13 @@ changed and saved.
 Development
 ^^^^^^^^^^^
 
+Source code is available on https://github.com/openpolis/django-uwsgi-taskmanager.
 
-Source code is available on ... [#TODO],
+Tests can be launched with
 
-Tests can be launched with ... [#TODO],
+.. code-block:: bash
 
-Coverage of the test code is measured with ... [#TODO],
+    python demo/manage.py test
 
 The source code is tested for syntax and format using black_.
 

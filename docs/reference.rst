@@ -28,7 +28,6 @@ taskmanager.management.base
    .. autosummary::
 
       LoggingBaseCommand
-      NoTerminatorStreamHandler
 
 taskmanager.logging
 -------------------
