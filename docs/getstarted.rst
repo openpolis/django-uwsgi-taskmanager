@@ -76,7 +76,7 @@ Install Django uWSGI taskmanager:
 
 .. code-block:: bash
 
-    (venv) $ pip install django-uwsgi-taskmanager django_extensions
+    (venv) $ pip install django-uwsgi-taskmanager
 
 Install uWSGI (if you use the uWSGI binary from your OS, you can skip this step):
 
