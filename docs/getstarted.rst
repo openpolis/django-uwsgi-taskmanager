@@ -76,7 +76,7 @@ Install Django uWSGI taskmanager:
 
 .. code-block:: bash
 
-    (venv) $ pip install django-uwsgi-taskmanager
+    (venv) $ pip install django-uwsgi-taskmanager django_extensions
 
 Install uWSGI (if you use the uWSGI binary from your OS, you can skip this step):
 
@@ -130,7 +130,15 @@ Proceed as indicated in the video, to create a test task and launch it.
 .. embed:: https://vimeo.com/382021592
   :max_width: 700
 
-|
+Follow task execution in the lov-viewer window
+++++++++++++++++++++++++++++++++++++++++++++++
+From version 2.2.0, after the task has been launched, the link to log messages brings to the ``log-viewer``
+windows, where log messages can be seen, updating in almost-real-time, and filtered or searched.
+
+The following video shows a sample, using the ``test_livelogging_command`` task that generates info, debug, warnings and errors messages.
+
+.. embed:: https://vimeo.com/433933483
+  :max_width: 700
 
 Scheduling
 ++++++++++

@@ -90,16 +90,24 @@ class Report(models.Model):
             log_lines = self.log.split("\n")
         return log_lines
 
-    def read_log_lines(self, offset):
-        """Uses pigtail to read all lines of log file not yed read.
-        Info about read lines are kept in <logfile.offset>.
+    def read_log_lines(self, offset: int):
+        """Uses an offset to read just lines of the log file not yet read.
 
-        :return: lines of log not yet read
+        :param: offset parameter in bytes
+
+        :return: 2-tuple (list, int)
+          - list of lines of log files from offset
+          - the size of the file in bytes
         """
         if os.path.exists(self.logfile):
-            return [line.strip('\n') for line in open(self.logfile, "r")][offset:]
+            fh = open(self.logfile, "r")
+            fh.seek(offset)
+            log_lines = [line.strip('\n') for line in fh]
+            log_size = fh.tell()
+            fh.close()
+            return log_lines, log_size
         else:
-            return []
+            return [], None
 
     def emit_notifications(self):
         """Emit a slack or email notification."""
@@ -235,7 +243,7 @@ class Task(models.Model):
     def get_next_ride(self) -> datetime.datetime:
         """Get the next ride."""
         utc_tz = pytz.timezone('UTC')
-        if self.repetition_period and self.status == self.STATUS_SPOOLED:
+        if self.repetition_period and self.status in [self.STATUS_SPOOLED, self.STATUS_STARTED]:
             now = self.last_invocation_datetime
 
             if self.repetition_rate in (None, 0):

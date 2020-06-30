@@ -191,25 +191,40 @@ Reading the task's reports
   :width: 800
   :alt: Django tasks reports
 
-Once a task is finished, a report is generated and added to the **report** section. Only the last 5 reports
+Once a task is finished, a report is generated and added to the **reports** section. Only the last 5 reports
 are left available to the users, in order to save space.
 
 Each report contains the **result** and **invocation datetime** fields, along with the *tail* of the last 10
 lines logged during execution.
 
-Clicking on the *complete log with filters* link, a new page cotaining the log messages is opened.
+Clicking on the *show the log messages* link, a new page cotaining the log messages is opened.
 
 .. image:: /_static/images/admin_gui_10.png
   :width: 800
   :alt: Django tasks report with log messages
 
-The log levels (``ALL``, ``WARNING``, ``ERROR``) add as filter and clicking on them only the messages
-logget at the given level will be shown.
+If the task is still executing, the page will be refreshed, in order for the new messages to be
+added to the page.
+
+On top of the page there is a **toolbar**, divided into three sections:
+
+ - the **levels buttons** (``ALL``, ``DEBUG``, ``INFO``, ``WARNING``, ``ERROR``) act as filters and
+   clicking on one of them only the messages of that type will be listed;
+   the numbers appearing by each button indicate how many messages of that type have been produced;
+   buttons only appear when some message of that type is added to the log file;
+ - the **search field** allows to filter messages by a string: only messages containing the string are listed;
+   clicking on the 'x' button by the search field will reset all filters and is equivalent to pressing the ``ALL`` button;
+ - as for the commands on the right side of the toolbar:
+
+   - the **raw logs** button allows to open up a new page with the log files in raw text format
+   - the **sticky mode** button disable or enable the scrolling of the messages display to the bottom; this can be used in order
+     to disable following the logging messages and concentrating on some research;
 
 .. note::
 
     The complete list of log messages is rendered on a single page. This can be problematic whenever the
-    list is really long, as rendering times may be long too.
+    list is really long, as rendering times may be long too. The only solution that comes to mind is to implement
+    tasks that doesn't log too many rows.
 
 .. rubric:: Footnotes
 .. [#excludecore] `excludecore` ensures that core django tasks are not fetched.

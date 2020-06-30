@@ -1,6 +1,6 @@
 """Configure taskmanager app."""
 from pydoc import locate
-from typing import Dict, Type, Any
+from typing import Dict, Type
 
 from django.apps import AppConfig
 from django.utils.translation import ugettext_lazy as _

@@ -59,6 +59,9 @@ class LiveLogViewerView(TemplateView):
 
         try:
             report = Report.objects.get(pk=pk)
+            context['report'] = report
+            context['task'] = report.task
+            context['task_arguments'] = report.task.arguments.split(',')
         except Report.DoesNotExist:
             pass
 
@@ -66,7 +69,9 @@ class LiveLogViewerView(TemplateView):
 
 
 class AjaxReadLogLines(LogViewerView):
-    """Read log lines starting from an offset, as JsonResponse"""
+    """Read log lines starting from an offset, as JsonResponse
+    New log size and task status are included in the response.
+    """
 
     def render_to_response(self, context, **response_kwargs):
         pk = context.get("pk", None)
@@ -77,10 +82,12 @@ class AjaxReadLogLines(LogViewerView):
         except Report.DoesNotExist:
             log_lines = [_("No log for the report {pk}.").format(pk=pk), ]
             task_status = None
+            log_size = 0
         else:
-            log_lines = report.read_log_lines(offset)
+            log_lines, log_size = report.read_log_lines(offset)
 
         return JsonResponse({
             'new_log_lines': log_lines,
-            'task_status': task_status
+            'task_status': task_status,
+            'log_size': log_size
         })

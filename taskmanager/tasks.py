@@ -120,7 +120,7 @@ def exec_command_task(curr_task: "Task"):
     curr_task.cached_last_invocation_datetime = report_obj.invocation_datetime
 
     # Re-schedule the Task if needed
-    if curr_task.repetition_period:
+    if curr_task.repetition_period and curr_task.get_next_ride():
 
         # compute next_ride
         next_ride = curr_task.get_next_ride()
