@@ -214,7 +214,7 @@
             <div id="messages-display" ref="messagesDisplay">
                 <div v-for="(msg, index) in filteredMessages" class="message-row">
                     <a v-bind:id="'#L'+(index + 1)">[[index + 1]]</a>
-                    <span>[[msg]]</span>
+                    <span v-html="msg"></span>
                 </div>
                 <div v-if="status == 'started'" class="loader-animation pt-3 pl-3">
                     <div class="dot"></div>
