@@ -155,7 +155,7 @@ class SlackNotificationHandler(NotificationHandler):
                 "text": {
                     "type": "mrkdwn",
                     "text": (
-                        "Logs tail:\n" f"```{log_tail(report.log, n_lines=UWSGI_TASKMANAGER_N_LINES_IN_REPORT_LOG)}```"
+                        "Logs tail:\n" f"```{log_tail(report.log)}```"
                     ),
                 },
             },
