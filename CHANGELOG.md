@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unpublished]
 
+## [2.2.3] - 2020-07-09
+
+### Fixed
+- length of report in slack block taken from UWSGI_TASKMANAGER_N_LINES_IN_REPORT_LOG settings value
+- link to live log viewer substitutes the old link to raw log messages
+
+## [2.2.2] - 2020-06-30
+
+### Changed
+- links to latest logs in tasks list substituted with the live_log_viewer url
+
 ## [2.2.1] - 2020-06-30
 
 ### Fixed

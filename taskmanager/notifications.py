@@ -7,6 +7,9 @@ from django.core.mail import send_mail
 from django.urls import reverse
 
 from taskmanager.utils import get_base_url, log_tail
+from taskmanager.settings import (
+    UWSGI_TASKMANAGER_N_LINES_IN_REPORT_LOG,
+)
 
 if TYPE_CHECKING:
     from taskmanager.models import Report
@@ -127,14 +130,17 @@ class SlackNotificationHandler(NotificationHandler):
         )
 
         base_url = get_base_url()
-        logviewer_url = reverse("log_viewer", args=(report.id,))
+        logviewer_url = reverse("live_log_viewer", args=(report.id,))
 
         blocks = [
             {
                 "type": "context",
                 "elements": [{"type": "mrkdwn", "text": "django-uwsgi-taskmanager", }],
             },
-            {"type": "section", "text": {"type": "mrkdwn", "text": text, }, },
+            {
+                "type": "section",
+                "text": {"type": "mrkdwn", "text": text, },
+            },
             {
                 "type": "context",
                 "elements": [
@@ -148,7 +154,9 @@ class SlackNotificationHandler(NotificationHandler):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": ("Logs tail:\n" f"```{log_tail(report.log)}```"),
+                    "text": (
+                        "Logs tail:\n" f"```{log_tail(report.log, n_lines=UWSGI_TASKMANAGER_N_LINES_IN_REPORT_LOG)}```"
+                    ),
                 },
             },
         ]
