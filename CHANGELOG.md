@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unpublished]
 
+## [2.2.4] - 2020-07-15
+
+### Fixed
+- size of command and arguments fixed-width font in sidebar diminished
+
 ## [2.2.3] - 2020-07-09
 
 ### Fixed
