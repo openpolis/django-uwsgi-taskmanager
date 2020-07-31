@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unpublished]
 
+## [2.2.5] - 2020-07-31
+
+### Added
+- button to switch to no-wrapped text and back added to live log viewer
+
 ## [2.2.4] - 2020-07-15
 
 ### Fixed

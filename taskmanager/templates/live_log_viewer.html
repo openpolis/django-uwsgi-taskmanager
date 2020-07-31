@@ -24,7 +24,7 @@
             color: white;
             font-family: 'Courier New', serif;
             height: 90%;
-            overflow-y: scroll;
+            overflow: auto;
             border-top: 5px solid black;
             border-bottom: 5px solid black;
         }
@@ -208,11 +208,22 @@
                         width="16" alt="double-down-arrow-icon"
                         title="{% trans "Click to flip stickiness (follows log messages)" %}"
                         ></button>
+                    <button name="wrap"
+                        v-on:click="wrapFlip"
+                        v-bind:class="{active: wrap_style=='normal'}"
+                    ><img
+                        src="{% static 'img/iconfinder_ic_wrap_text.png' %}"
+                        width="16" alt="document-icon"
+                        title="{% trans "Click to flip line wraps (improve readability of long lines)" %}"
+                        ></button>
                 </div>
             </div>
 
             <div id="messages-display" ref="messagesDisplay">
-                <div v-for="(msg, index) in filteredMessages" class="message-row">
+                <div v-for="(msg, index) in filteredMessages"
+                    v-bind:style="{ whiteSpace: wrap_style }"
+                    class="message-row"
+                    >
                     <a v-bind:id="'#L'+(index + 1)">[[index + 1]]</a>
                     <span v-html="msg"></span>
                 </div>
@@ -246,7 +257,8 @@
             offset: 0,
             status: "unknown",
             next_ride: null,
-            sticky: true
+            sticky: true,
+            wrap_style: "normal"
           },
           methods: {
             loadData: function () {
@@ -305,6 +317,12 @@
             },
             stickyFlip: function() {
                 this.sticky = !this.sticky
+            },
+            wrapFlip: function() {
+                if (this.wrap_style === 'normal')
+                    this.wrap_style = 'nowrap'
+                else
+                    this.wrap_style = 'normal'
             }
           },
           computed: {
