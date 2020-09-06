@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unpublished]
 
+## [2.2.6] - 2020-09-06
+
+### Added
+- ``locale`` dir added, with italian translations.
+
+### Changed
+- Tasks list in admin interface improved.
+
 ## [2.2.5] - 2020-07-31
 
 ### Added
