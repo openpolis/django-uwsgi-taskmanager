@@ -7,9 +7,6 @@ from django.core.mail import send_mail
 from django.urls import reverse
 
 from taskmanager.utils import get_base_url, log_tail
-from taskmanager.settings import (
-    UWSGI_TASKMANAGER_N_LINES_IN_REPORT_LOG,
-)
 
 if TYPE_CHECKING:
     from taskmanager.models import Report

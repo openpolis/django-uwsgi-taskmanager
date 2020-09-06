@@ -252,16 +252,16 @@ class Task(models.Model):
             if self.repetition_period == self.REPETITION_PERIOD_MINUTE:
                 offset = datetime.timedelta(minutes=self.repetition_rate)
                 _next = (
-                    datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0, tzinfo=utc_tz) +
-                    offset +
-                    datetime.timedelta(seconds=self.scheduling.second)
+                    datetime.datetime(now.year, now.month, now.day, now.hour, now.minute, 0, tzinfo=utc_tz)
+                    + offset
+                    + datetime.timedelta(seconds=self.scheduling.second)
                 )
             elif self.repetition_period == self.REPETITION_PERIOD_HOUR:
                 offset = datetime.timedelta(hours=self.repetition_rate)
                 _next = (
-                    datetime.datetime(now.year, now.month, now.day, now.hour, 0, 0, tzinfo=utc_tz) +
-                    offset +
-                    datetime.timedelta(
+                    datetime.datetime(now.year, now.month, now.day, now.hour, 0, 0, tzinfo=utc_tz)
+                    + offset
+                    + datetime.timedelta(
                         minutes=self.scheduling.minute,
                         seconds=self.scheduling.second
                     )
@@ -269,9 +269,9 @@ class Task(models.Model):
             elif self.repetition_period == self.REPETITION_PERIOD_DAY:
                 offset = datetime.timedelta(days=self.repetition_rate)
                 _next = (
-                    datetime.datetime(now.year, now.month, now.day, 0, 0, 0, tzinfo=utc_tz) +
-                    offset +
-                    datetime.timedelta(
+                    datetime.datetime(now.year, now.month, now.day, 0, 0, 0, tzinfo=utc_tz)
+                    + offset
+                    + datetime.timedelta(
                         hours=self.scheduling.hour,
                         minutes=self.scheduling.minute,
                         seconds=self.scheduling.second
@@ -284,8 +284,7 @@ class Task(models.Model):
                         (now.month + int(self.repetition_period)) % 12,
                         0, 0, 0, 0,
                         tzinfo=utc_tz
-                    ) +
-                    datetime.timedelta(
+                    ) + datetime.timedelta(
                         hours=self.scheduling.hour,
                         minutes=self.scheduling.minute,
                         seconds=self.scheduling.second
