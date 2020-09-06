@@ -5,9 +5,11 @@ from django.contrib import admin, messages
 from django.contrib.admin.actions import delete_selected
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext_lazy
 from pytz import timezone
+from django.utils.translation import ugettext_lazy as _
 
 from taskmanager.models import AppCommand, Report, Task, TaskCategory
 from taskmanager.settings import (
@@ -273,17 +275,17 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
     change_form_template = "admin/custom_changeform.html"
     inlines = [ReportInline]
     list_display = (
-        "name",
-        "arguments",
+        "last_result",
+        "name_desc",
+        "invocation",
         "status",
-        "repetition_str",
-        "last_result_str",
-        "next_ride_str",
-        "cached_last_invocation_n_errors",
-        "cached_last_invocation_n_warnings",
+        "cached_last_invocation_datetime",
+        "cached_next_ride",
+        "repetition",
     )
+    list_display_links = ('name_desc',)
     list_filter = ("status", "cached_last_invocation_result", "category")
-    ordering = ("name",)
+    ordering = ("-cached_last_invocation_datetime",)
     fieldsets = (
         (
             "Definition",
@@ -396,46 +398,64 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
 
     launch_tasks.short_description = ugettext_lazy("Start selected tasks")
 
-    def last_result_str(self, obj):
-        """Return the string representation of the last result."""
-        last_invocation_dt = convert_to_local_dt(obj.cached_last_invocation_datetime)
-        try:
-            s = (
-                f"{last_invocation_dt}: "
-                f"{obj.cached_last_invocation_result} - "
-                f"{obj.cached_last_invocation_n_errors}E, "
-                f"{obj.cached_last_invocation_n_warnings}W"
-            )
-        except (AttributeError, TypeError):
-            s = "-"
-        if getattr(settings, "UWSGI_TASKMANAGER_SHOW_LOGVIEWER_LINK", False):
-            from django.utils.html import format_html
-
-            if obj.last_report:
-                last_report_url = reverse("live_log_viewer", args=(obj.last_report.id,))
-                s = format_html(f'<a href="{last_report_url}" target="_blank">{s}</a>')
-        return s
-
-    last_result_str.short_description = "Last result"
-    last_result_str.allow_tags = True
-
-    def repetition_str(self, obj):
+    def repetition(self, obj):
         """Return the string representation of the repetition."""
         if obj.repetition_rate and obj.repetition_period:
             return f"{obj.repetition_rate} {obj.repetition_period}"
         else:
             return "-"
 
-    repetition_str.short_description = "Repetition"
+    repetition.short_description = _("Repetition rate")
 
-    def next_ride_str(self, obj):
+    def name_desc(self, obj):
+        return format_html(
+            f"<span title=\"{obj.note}\">{obj.name}</span>"
+        )
+
+    name_desc.short_description = _("Name")
+
+    def invocation(self, obj):
+        return format_html(
+            f"<span style=\"font-weight: normal; font-family: Courier\"><b>{obj.command.name}</b> <br/>"
+            f"{' '.join(obj.arguments.split(','))}</span>"
+        )
+
+    invocation.short_description = _("Invocation")
+
+    def last_result(self, obj):
+        result = obj.cached_last_invocation_result.upper()
+        bgcolor = 'green'
+        title = _("Show logs in new tab")
+        result_str = result
+        if result == 'WARNINGS':
+            bgcolor = '#CCCC00'
+            result_str = _(f"{obj.cached_last_invocation_n_warnings} WARNINGS")
+        elif result == 'ERRORS':
+            bgcolor = 'orange'
+            result_str = _(f"{obj.cached_last_invocation_n_errors} ERRORS")
+        elif result == 'FAILED':
+            bgcolor = 'red'
+            result_str = _("FAILED")
+
+        s = format_html(
+            f"<b style=\"border-left:10px solid {bgcolor}; padding-left: 5px;\">{result_str}</b>"
+        )
+
+        if obj.last_report:
+            last_report_url = reverse("live_log_viewer", args=(obj.last_report.id,))
+            s = format_html(f" <a href=\"{last_report_url}\" title=\"{title}\" target=\"_blank\">{s}</a>")
+
+        return s
+
+    last_result.short_description = _("Last result")
+    last_result.admin_order_field = 'cached_last_invocation_result'
+
+    def cached_last_invocation_datetime(self, obj):
         """Return the string representation of the next ride."""
-        if obj.cached_next_ride:
-            return f"{convert_to_local_dt(obj.cached_next_ride)}"
+        if obj.cached_last_invocation_datetime:
+            return f"{convert_to_local_dt(obj.cached_last_invocation_datetime)}"
         else:
             return "-"
-
-    next_ride_str.short_description = "Next ride"
 
     class Media:
         """Task Admin asset definitions."""

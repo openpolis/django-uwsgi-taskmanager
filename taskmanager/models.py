@@ -312,7 +312,7 @@ class Task(models.Model):
         res = {}
         if not self.arguments or self.arguments.strip() == "":
             return res
-        args = re.split(r"\s*,{1}\s*", self.arguments)
+        args = re.split(r"\s*,\s*", self.arguments)
         for arg in args:
             arg_chunks = re.split(r"[\s=]?\s+", arg, 1)
             argument = arg_chunks[0].strip(" =")
