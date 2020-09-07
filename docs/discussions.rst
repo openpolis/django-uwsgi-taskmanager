@@ -2,7 +2,7 @@ Discussions
 ===========
 
 
-Although `Celery`_ is the most straightforward solution to execute
+Although `Celery`_ is the most used solution to execute
 `distributed asynchronous tasks in python`_ and django-channels_ is the new hype,
 this project offers a solution based on `uWSGI spooler`_,
 which requires no additional components, is particularly easy to setup,

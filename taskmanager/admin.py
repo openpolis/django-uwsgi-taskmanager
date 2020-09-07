@@ -423,7 +423,9 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
     invocation.short_description = _("Invocation")
 
     def last_result(self, obj):
-        result = obj.cached_last_invocation_result.upper()
+        result = obj.cached_last_invocation_result
+        if result:
+            result = result.upper()
         bgcolor = 'green'
         title = _("Show logs in new tab")
         result_str = result

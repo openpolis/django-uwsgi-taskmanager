@@ -3,7 +3,7 @@
 How to manage tasks in the django admin site
 --------------------------------------------
 
-This documentation is for **users** that want to manage management tasks within the django admin site.
+This documentation is for **users** that want to manage tasks within the django admin site.
 
 It is supposed that the users know the basic usage of a django admin interface,
 so CRUD operations will not be descibed here.
@@ -73,6 +73,20 @@ Actions are available to have a task start or stop, both in the *list view* and 
   :width: 800
   :alt: Django task details view with custom buttons
 
+Tasks are sorted, by default, by the latest launch time. This way the most used tasks are shown first,
+avoiding to clutter the list with unused tasks. Other sort criterion may be chosen by clicking on the column
+headers, as usual.
+
+Tasks last results are shown both with a color code and with a verbose indication of the number of errors/warnings,
+if any are there.
+A task with warnings and errors (yellow and orange color codes), may be perfectly ok, as many times the errors may
+indicate some problems in the data source.
+A failed task (red code) requires immediate intervention, as it indicates some missing code or logic in the task itself.
+
+Clicking on the last result status opens a new tab with the log messages for that particular execution.
+
+Hovering over the name of the task shows the descriptive note, if inserted by the task authors. This may
+describe aspects of that task instance and peculiarities of the arguments to pass.
 
 Task structure
 ^^^^^^^^^^^^^^

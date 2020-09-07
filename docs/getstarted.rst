@@ -127,6 +127,9 @@ Add and launch a task
 
 Proceed as indicated in the video, to create a test task and launch it.
 
+Please note that the video refers to an older release and the UI interface may have changes slightly.
+The sense of the operations still are perfectly valid.
+
 .. embed:: https://vimeo.com/382021592
   :max_width: 700
 

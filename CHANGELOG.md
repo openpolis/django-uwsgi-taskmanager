@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unpublished]
 
+## [2.2.7] - 2020-09-06
+### Fixed
+- hotfix for when tasks were never launched (result is None)
+
+### Changed
+- documentation adapted to
+
 ## [2.2.6] - 2020-09-06
 
 ### Added
@@ -167,7 +174,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release
 
 
-[unreleased]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.0.4...master
+[unreleased]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.7...master
+[2.2.7]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.6...v2.2.7
+[2.2.6]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.5...v2.2.6
+[2.2.5]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.4...v2.2.5
+[2.2.4]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.3...v2.2.4
+[2.2.3]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.2...v2.2.3
+[2.2.2]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.1...v2.2.2
+[2.2.1]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.0...v2.2.1
+[2.2.0]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.1.1...v2.2.0
+[2.1.1]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.1.0...v2.1.1
+[2.1.0]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.0.4...v2.1.0
 [2.0.4]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.0.3...v2.0.4
 [2.0.3]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.0.2...v2.0.3
 [2.0.2]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.0.1...v2.0.2
