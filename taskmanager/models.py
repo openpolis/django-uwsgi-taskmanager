@@ -278,13 +278,15 @@ class Task(models.Model):
                     )
                 )
             else:
+                offset = datetime.timedelta(months=self.repetition_rate)
                 _next = (
                     datetime.datetime(
                         now.year,
-                        (now.month + int(self.repetition_period)) % 12,
+                        now.month,
                         0, 0, 0, 0,
                         tzinfo=utc_tz
-                    ) + datetime.timedelta(
+                    ) + offset
+                    + datetime.timedelta(
                         hours=self.scheduling.hour,
                         minutes=self.scheduling.minute,
                         seconds=self.scheduling.second
