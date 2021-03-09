@@ -287,6 +287,7 @@ class Task(models.Model):
                         tzinfo=utc_tz
                     ) + offset
                     + datetime.timedelta(
+                        days=self.scheduling.day,
                         hours=self.scheduling.hour,
                         minutes=self.scheduling.minute,
                         seconds=self.scheduling.second
