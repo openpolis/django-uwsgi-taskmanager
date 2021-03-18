@@ -410,7 +410,6 @@ class Task(models.Model):
             pass
 
         self.cached_next_ride = self.get_next_ride()
-        self.keep_last_n_reports()
         self.save(update_fields=("spooler_id", "status", "cached_next_ride"))
 
     def keep_last_n_reports(self, n: int = UWSGI_TASKMANAGER_N_REPORTS_INLINE):

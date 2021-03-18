@@ -104,15 +104,7 @@ def exec_command_task(curr_task: "Task"):
     report_obj.n_log_lines = n_log_lines
     report_obj.n_log_errors = n_log_errors
     report_obj.n_log_warnings = n_log_warnings
-    report_obj.save(
-        update_fields=(
-            "invocation_result",
-            "log",
-            "n_log_lines",
-            "n_log_errors",
-            "n_log_warnings",
-        )
-    )
+    report_obj.save()
 
     curr_task.cached_last_invocation_result = report_obj.invocation_result
     curr_task.cached_last_invocation_n_errors = report_obj.n_log_errors
