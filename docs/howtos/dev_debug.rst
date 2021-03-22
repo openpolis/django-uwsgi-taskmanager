@@ -11,11 +11,13 @@ The following procedure works in pyCharm IDE.
 
     .. code-block::
 
-        uwsgi --check-static=./resources --http=:8000 --master \
-          --module=wsgi --callable=application \
-          --pythonpath=/Users/gu/Workspace/opdm-service \
+        uwsgi --http=:8000 --master \
+          --chdir=/Users/gu/Workspace/django-uwsgi-taskmanager/demo \
+          --static-map /static=./static \
+          --module=demo.wsgi --callable=application \
+          --pythonpath=/Users/gu/Workspace/django-uwsgi-taskmanager/demo \
           --processes=2 \
-          --spooler=./resources/uwsgi-spooler --spooler-processes=1
+          --spooler=./spooler --spooler-processes=1
 
 3. define a python remote debug configuration on pycharm, using localhost:4444 as host:port
 4. add this snippet of code right before the point you want the execution to break
