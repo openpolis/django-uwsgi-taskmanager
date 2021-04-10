@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - debug documentation updated: the uwsgi launch command has been tested on a demo project
 
+## [2.2.11]
+### Fixed
+- datetimes with homogeneous time zones must be used in comparisons
+
 ## [2.2.10]
 ### Fixed
 - bug in computation for next ride in case of months periodicity

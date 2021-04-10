@@ -245,7 +245,7 @@ class Task(models.Model):
         """Get the next ride."""
         utc_tz = pytz.timezone('UTC')
         if self.repetition_period and self.status in [self.STATUS_SPOOLED, self.STATUS_STARTED]:
-            now = self.last_invocation_datetime or datetime.datetime.now()
+            now = self.last_invocation_datetime or datetime.datetime.now().replace(tzinfo=utc_tz)
 
             if self.repetition_rate in (None, 0):
                 # consider 1 as default repetition_rate
@@ -285,7 +285,7 @@ class Task(models.Model):
                     year = sourcedate.year + month // 12
                     month = month % 12 + 1
                     day = min(sourcedate.day, calendar.monthrange(year,month)[1])
-                    return datetime.datetime(year, month, day)
+                    return datetime.datetime(year, month, day, tzinfo=utc_tz)
 
                 _next = (
                     add_months(now, self.repetition_rate)
