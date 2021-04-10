@@ -1,4 +1,5 @@
 """Define Django models for the taskmanager app."""
+import calendar
 import datetime
 import os
 import re
@@ -244,7 +245,7 @@ class Task(models.Model):
         """Get the next ride."""
         utc_tz = pytz.timezone('UTC')
         if self.repetition_period and self.status in [self.STATUS_SPOOLED, self.STATUS_STARTED]:
-            now = self.last_invocation_datetime
+            now = self.last_invocation_datetime or datetime.datetime.now()
 
             if self.repetition_rate in (None, 0):
                 # consider 1 as default repetition_rate
@@ -278,19 +279,19 @@ class Task(models.Model):
                     )
                 )
             else:
-                offset = datetime.timedelta(months=self.repetition_rate)
+                # monthly scheduling requires a different computation
+                def add_months(sourcedate, months):
+                    month = sourcedate.month - 1 + months
+                    year = sourcedate.year + month // 12
+                    month = month % 12 + 1
+                    day = min(sourcedate.day, calendar.monthrange(year,month)[1])
+                    return datetime.datetime(year, month, day)
+
                 _next = (
-                    datetime.datetime(
-                        now.year,
-                        now.month,
-                        0, 0, 0, 0,
-                        tzinfo=utc_tz
-                    ) + offset
+                    add_months(now, self.repetition_rate)
                     + datetime.timedelta(
-                        days=self.scheduling.day,
                         hours=self.scheduling.hour,
                         minutes=self.scheduling.minute,
-                        seconds=self.scheduling.second
                     )
                 )
 

@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - debug documentation updated: the uwsgi launch command has been tested on a demo project
 
+## [2.2.10]
+### Fixed
+- bug in computation for next ride in case of months periodicity
+
 ## [2.2.9]
 ### Fixed
 - a race condition on report's save, that generated a DatabaseError has been fixed
@@ -184,7 +188,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release
 
 
-[unreleased]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.7...master
+[unreleased]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.10...master
+[2.2.10]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.9...v2.2.10
+[2.2.9]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.8...v2.2.9
+[2.2.8]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.7...v2.2.8
 [2.2.7]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.6...v2.2.7
 [2.2.6]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.5...v2.2.6
 [2.2.5]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.4...v2.2.5
