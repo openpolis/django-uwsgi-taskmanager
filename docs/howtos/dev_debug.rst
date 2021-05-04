@@ -7,7 +7,7 @@ a hack through remote debugging.
 The following procedure works in pyCharm IDE.
 
 1. ``pip install pydevd-pycharm==191.6605.12`` (versions must be upgraded, see preferences/about)
-2. open a shell in the virtual environment and prepare this command with the follwing set of arguments:
+2. open a shell in the virtual environment and prepare this command with the following set of arguments:
 
     .. code-block::
 
