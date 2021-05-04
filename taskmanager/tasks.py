@@ -152,4 +152,7 @@ def exec_command_task(curr_task: "Task"):
     )
 
     # Finally, emit notifications
-    report_obj.emit_notifications()
+    try:
+        report_obj.emit_notifications()
+    except Exception as e:
+        pass
