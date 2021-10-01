@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [2.2.13]
+### Added
+- `restart_despooled_tasks` management task added, in order to manually restart 
+  those tasks in a SPOOLED state, but with no spooler file; 
+  closes https://github.com/openpolis/django-uwsgi-taskmanager/issues/28
+
 ## [2.2.12]
 ### Fixed
 - `emit_notifications` trapped, as exceptions generated nasty errors
@@ -197,7 +203,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - First release
 
 
-[unreleased]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.12...master
+[unreleased]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.13...master
+[2.2.13]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.12...v2.2.13
 [2.2.12]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.11...v2.2.12
 [2.2.11]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.10...v2.2.11
 [2.2.10]: https://github.com/openpolis/django-uwsgi-taskmanager/compare/v2.2.9...v2.2.10
