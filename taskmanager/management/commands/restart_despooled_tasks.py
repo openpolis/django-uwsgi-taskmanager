@@ -54,7 +54,7 @@ class Command(LoggingBaseCommand):
                         self.logger.info(f"Task {t} restarted. Next launch will be at {t.get_next_ride()}")
                         t.save()
                         t.stop()
-                        t.start()
+                        t.launch()
 
             self.logger.info("Procedure completed.")
         else:

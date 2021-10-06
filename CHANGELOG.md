@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [unreleased]
 
+## [2.2.14]
+### Fixed
+- `restart_despooled_tasks` management task fixed (non-existing start method substituted by launch) 
+
 ## [2.2.13]
 ### Added
 - `restart_despooled_tasks` management task added, in order to manually restart 
