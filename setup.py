@@ -49,6 +49,7 @@ setup(
             "flake8",
             "isort",
             "mypy",
+            "pytz",
             "pre-commit",
         ],
         "docs": [
