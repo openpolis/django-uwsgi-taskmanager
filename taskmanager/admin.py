@@ -7,9 +7,11 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext_lazy
 from pytz import timezone
-from django.utils.translation import ugettext_lazy as _
+try:
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    from django.utils.translation import gettext_lazy as _
 
 from taskmanager.models import AppCommand, Report, Task, TaskCategory
 from taskmanager.settings import (
@@ -52,7 +54,7 @@ class ReportMixin(object):
         lines += log_tail(obj.log, n_max_lines)
         if getattr(settings, "UWSGI_TASKMANAGER_SHOW_LOGVIEWER_LINK", False):
             last_report_url = reverse("live_log_viewer", args=(obj.pk,))
-            lines += ugettext_lazy(
+            lines += _(
                 (
                     "\n\n<a href='{0}' target='_blank'>"
                     "Show the log messages</a>"
@@ -240,7 +242,7 @@ class BulkDeleteMixin(object):
         actions["delete_selected"] = (
             BulkDeleteMixin.action_safe_bulk_delete,
             "delete_selected",
-            ugettext_lazy("Delete selected %(verbose_name_plural)s"),
+            _("Delete selected %(verbose_name_plural)s"),
         )
         return actions
 
@@ -386,7 +388,7 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
             level=messages.SUCCESS,
         )
 
-    stop_tasks.short_description = ugettext_lazy("Stop selected tasks")
+    stop_tasks.short_description = _("Stop selected tasks")
 
     def launch_tasks(self, request, queryset):
         """Launch selected tasks."""
@@ -396,7 +398,7 @@ class TaskAdmin(BulkDeleteMixin, admin.ModelAdmin):
             request, f"{len(queryset)} tasks launched", level=messages.SUCCESS
         )
 
-    launch_tasks.short_description = ugettext_lazy("Start selected tasks")
+    launch_tasks.short_description = _("Start selected tasks")
 
     def repetition(self, obj):
         """Return the string representation of the repetition."""

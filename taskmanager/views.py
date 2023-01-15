@@ -1,6 +1,10 @@
 """Define Django views for the taskmanager app."""
 from django.http import JsonResponse
-from django.utils.translation import ugettext_lazy as _
+try:
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    from django.utils.translation import gettext_lazy as _
+
 from django.views.generic import TemplateView
 
 from taskmanager.models import Report

@@ -9,8 +9,10 @@ from typing import Dict
 import pytz
 from django.core.management import load_command_class
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
-
+try:
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    from django.utils.translation import gettext_lazy as _
 from taskmanager import notifications
 from taskmanager.settings import UWSGI_TASKMANAGER_N_REPORTS_INLINE
 from taskmanager.tasks import exec_command_task
