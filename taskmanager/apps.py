@@ -3,7 +3,10 @@ from pydoc import locate
 from typing import Dict, Type
 
 from django.apps import AppConfig
-from django.utils.translation import ugettext_lazy as _
+try:
+    from django.utils.translation import ugettext_lazy as _
+except ImportError:
+    from django.utils.translation import gettext_lazy as _
 
 from taskmanager.notifications import NotificationHandler
 from taskmanager.settings import UWSGI_TASKMANAGER_NOTIFICATION_HANDLERS
