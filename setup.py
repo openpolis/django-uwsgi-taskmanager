@@ -39,7 +39,7 @@ setup(
         "file-read-backwards>=2.0.0",
     ],
     extras_require={
-        "notifications": ["slackclient"],
+        "notifications": ["slack_sdk"],
         "dev": [
             "black",
             "bump2version",

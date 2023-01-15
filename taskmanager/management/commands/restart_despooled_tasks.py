@@ -53,6 +53,8 @@ class Command(LoggingBaseCommand):
                     else:
                         self.logger.info(f"Task {t} restarted. Next launch will be at {t.get_next_ride()}")
                         t.save()
+                        spooler_id = t.spooler_id
+
                         t.stop()
                         t.launch()
 

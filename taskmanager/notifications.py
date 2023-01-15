@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 try:
-    import slack
+    import slack_sdk
 except ImportError:  # pragma: no cover
     slack = None
 
