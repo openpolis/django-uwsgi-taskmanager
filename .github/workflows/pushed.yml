@@ -24,7 +24,7 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --ignore=C901 --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-   test-dj4:
+  test-dj4:
     needs: lint-check
     runs-on: ubuntu-22.04
     strategy:
@@ -52,7 +52,6 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9, 3.10]
-
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python ${{ matrix.python-version }}
@@ -74,7 +73,6 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6, 3.7, 3.8, 3.9, 3.10]
-
     steps:
     - uses: actions/checkout@v1
     - name: Set up Python ${{ matrix.python-version }}
